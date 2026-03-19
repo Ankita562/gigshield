@@ -17,7 +17,7 @@ Food delivery partners (Zomato, Swiggy, Zepto, Blinkit) earn ₹700–₹1,200/d
 
 ## 2. Platform
 
-**Responsive PWA** (React + Tailwind). Delivery partners already run 4+ heavy apps on budget phones. A browser shortcut requires zero download, works offline, and runs lighter than any native app.
+**Mobile Application (React Native + Expo)**. Delivery partners rely exclusively on their smartphones to operate. Building a cross-platform React Native app allows us to maintain a single, highly efficient codebase for both Android and iOS, while giving us crucial access to native device capabilities like secure push notifications, background location validation (for fraud detection), and seamless UPI app deep-linking for instant payouts.
 
 ---
 
@@ -164,7 +164,7 @@ flowchart LR
 
 | Layer | Technology |
 |---|---|
-| Frontend | React.js + Tailwind CSS (PWA) |
+| Frontend | React Native |
 | Backend | Node.js + Express |
 | AI Service | Python + Flask + Scikit-learn |
 | Database | MongoDB |
@@ -181,7 +181,7 @@ Microservices architecture — AI service runs independently so ML models can be
 | Phase | Weeks | Deliverables |
 |---|---|---|
 | Seed | 1–2 | Schema, API setup, wireframes, README, pitch video |
-| Scale | 3–4 | PWA frontend, Express backend, MongoDB, trigger engine, premium cron, Razorpay |
+| Scale | 3–4 | React Native mobile app, Express backend, MongoDB, trigger engine, premium cron, Razorpay |
 | Soar | 5–6 | Fraud model, Inspector dashboard, nudge engine, WhatsApp alerts, 5-min demo video |
 
 **Demo Day scenario:** Live rain trigger fires for Bengaluru PIN 560034 → GPS validated → fraud check passes → UPI payout in under 5 minutes → Inspector dashboard shows full audit trail.
@@ -193,7 +193,7 @@ Microservices architecture — AI service runs independently so ML models can be
 | Name | Role |
 |---|---|
 | Manaswi Asutkar | Team Lead + Product + IRDAI Compliance |
-| M Vishrutha | Frontend — React PWA, Worker Dashboard |
+| M Vishrutha | Mobile Frontend — React Native App, Worker Dashboard |
 | Arushi Dhar | Backend — Node.js, MongoDB, Cron Jobs |
 | Mahima Koul | ML Engineer — Pricing Model, Fraud Detector |
 | Ankita Gupta | Integrations + Admin & Inspector Dashboard |
