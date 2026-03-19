@@ -14,127 +14,119 @@ export function Profile() {
 
   return (
     <MobileLayout>
-      <div className="bg-gradient-to-br from-indigo-600 to-indigo-700 text-white px-6 pt-12 pb-8">
-        <h1 className="text-2xl font-bold mb-2">Profile</h1>
-        <p className="text-indigo-100 text-sm">Manage your account</p>
+      {/* HEADER */}
+      <div className="relative bg-gradient-to-br from-[#134074] via-[#13315c] to-[#0b2545] text-white px-6 pt-12 pb-24 overflow-hidden">
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-[#8da9c4] rounded-full blur-3xl"></div>
+          <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#0b2545] rounded-full blur-3xl"></div>
+        </div>
+
+        <div className="relative z-10">
+          <h1 className="text-2xl font-bold mb-1">Profile</h1>
+          <p className="text-[#8da9c4] text-sm">Manage your account</p>
+        </div>
       </div>
 
-      <div className="px-6 -mt-6 mb-6">
-        <div className="bg-white rounded-xl shadow-lg p-5 border border-gray-100">
+      {/* USER CARD */}
+      <div className="px-6 -mt-16 mb-6 relative z-20">
+        <div className="bg-[#eef4ed] rounded-2xl shadow-2xl p-6 border border-[#8da9c4]/30">
           <div className="flex items-center gap-4">
-            <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-full flex items-center justify-center text-white text-2xl font-bold">
+            <div className="w-16 h-16 bg-gradient-to-br from-[#134074] to-[#13315c] rounded-full flex items-center justify-center text-white text-xl font-bold">
               {userData.name.split(' ').map(n => n[0]).join('')}
             </div>
             <div>
-              <p className="font-bold text-gray-900 text-lg">{userData.name}</p>
-              <p className="text-sm text-gray-600">{userData.platform} Partner</p>
-              <p className="text-xs text-gray-500 mt-1">Member since {userData.joinDate}</p>
+              <p className="font-bold text-[#0b2545] text-lg">{userData.name}</p>
+              <p className="text-sm text-[#13315c]">{userData.platform} Partner</p>
+              <p className="text-xs text-[#13315c]/70 mt-1">
+                Member since {userData.joinDate}
+              </p>
             </div>
           </div>
         </div>
       </div>
 
+      {/* PERSONAL INFO */}
       <div className="px-6 mb-6">
-        <h2 className="font-semibold text-gray-900 mb-3">Personal Information</h2>
-        <div className="bg-white rounded-xl border border-gray-200 divide-y divide-gray-100">
-          <div className="p-4 flex items-center gap-3">
-            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-              <Phone className="w-5 h-5 text-blue-600" />
-            </div>
-            <div className="flex-1">
-              <p className="text-xs text-gray-500">Phone Number</p>
-              <p className="font-semibold text-gray-900">{userData.phone}</p>
-            </div>
-          </div>
+        <h2 className="text-lg font-bold text-[#0b2545] mb-3">
+          Personal Information
+        </h2>
 
-          <div className="p-4 flex items-center gap-3">
-            <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-              <MapPin className="w-5 h-5 text-green-600" />
+        <div className="bg-[#eef4ed] rounded-2xl border border-[#8da9c4]/40 divide-y divide-[#8da9c4]/30">
+          
+          {[
+            { icon: Phone, label: 'Phone Number', value: userData.phone },
+            { icon: MapPin, label: 'Service Location', value: userData.location },
+            { icon: CreditCard, label: 'UPI ID', value: userData.upiId },
+            { icon: Users, label: 'Nominee', value: userData.nominee },
+          ].map((item, i) => (
+            <div key={i} className="p-4 flex items-center gap-3">
+              <div className="w-10 h-10 bg-[#8da9c4]/40 rounded-xl flex items-center justify-center">
+                <item.icon className="w-5 h-5 text-[#134074]" />
+              </div>
+              <div className="flex-1">
+                <p className="text-xs text-[#13315c]/70">{item.label}</p>
+                <p className="font-semibold text-[#0b2545]">{item.value}</p>
+              </div>
             </div>
-            <div className="flex-1">
-              <p className="text-xs text-gray-500">Service Location</p>
-              <p className="font-semibold text-gray-900">{userData.location}</p>
-            </div>
-          </div>
-
-          <div className="p-4 flex items-center gap-3">
-            <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-              <CreditCard className="w-5 h-5 text-purple-600" />
-            </div>
-            <div className="flex-1">
-              <p className="text-xs text-gray-500">UPI ID</p>
-              <p className="font-semibold text-gray-900">{userData.upiId}</p>
-            </div>
-          </div>
-
-          <div className="p-4 flex items-center gap-3">
-            <div className="w-10 h-10 bg-orange-100 rounded-lg flex items-center justify-center">
-              <Users className="w-5 h-5 text-orange-600" />
-            </div>
-            <div className="flex-1">
-              <p className="text-xs text-gray-500">Nominee</p>
-              <p className="font-semibold text-gray-900">{userData.nominee}</p>
-            </div>
-          </div>
+          ))}
         </div>
       </div>
 
+      {/* ACCOUNT ACTIONS */}
       <div className="px-6 mb-6">
-        <h2 className="font-semibold text-gray-900 mb-3">Account Actions</h2>
-        <div className="bg-white rounded-xl border border-gray-200 divide-y divide-gray-100">
-          <button className="w-full p-4 flex items-center justify-between hover:bg-gray-50 transition-colors">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
-                <HelpCircle className="w-5 h-5 text-blue-600" />
-              </div>
-              <p className="font-semibold text-gray-900">Help & Support</p>
-            </div>
-            <ChevronRight className="w-5 h-5 text-gray-400" />
-          </button>
+        <h2 className="text-lg font-bold text-[#0b2545] mb-3">
+          Account Actions
+        </h2>
 
-          <button className="w-full p-4 flex items-center justify-between hover:bg-gray-50 transition-colors">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                <FileText className="w-5 h-5 text-green-600" />
+        <div className="bg-[#eef4ed] rounded-2xl border border-[#8da9c4]/40 divide-y divide-[#8da9c4]/30">
+          
+          {[
+            { icon: HelpCircle, label: 'Help & Support' },
+            { icon: FileText, label: 'Policy Documents' },
+            { icon: User, label: 'Update KYC' },
+          ].map((item, i) => (
+            <button
+              key={i}
+              className="w-full p-4 flex items-center justify-between hover:bg-[#8da9c4]/20 transition-all"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-[#8da9c4]/40 rounded-xl flex items-center justify-center">
+                  <item.icon className="w-5 h-5 text-[#134074]" />
+                </div>
+                <p className="font-semibold text-[#0b2545]">{item.label}</p>
               </div>
-              <p className="font-semibold text-gray-900">Policy Documents</p>
-            </div>
-            <ChevronRight className="w-5 h-5 text-gray-400" />
-          </button>
-
-          <button className="w-full p-4 flex items-center justify-between hover:bg-gray-50 transition-colors">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                <User className="w-5 h-5 text-purple-600" />
-              </div>
-              <p className="font-semibold text-gray-900">Update KYC</p>
-            </div>
-            <ChevronRight className="w-5 h-5 text-gray-400" />
-          </button>
+              <ChevronRight className="w-5 h-5 text-[#13315c]/60" />
+            </button>
+          ))}
         </div>
       </div>
 
+      {/* GRIEVANCE */}
       <div className="px-6 mb-6">
-        <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
-          <h3 className="font-semibold text-blue-900 mb-2">Grievance Redressal</h3>
-          <p className="text-sm text-blue-800 mb-3">
+        <div className="bg-[#8da9c4]/20 rounded-2xl p-5 border border-[#8da9c4]/50">
+          <h3 className="font-bold text-[#0b2545] mb-2">
+            Grievance Redressal
+          </h3>
+          <p className="text-sm text-[#13315c] mb-3">
             GigShield follows IRDAI 15-day SLA for all complaints. Auto-escalation triggered at day 13.
           </p>
-          <button className="text-sm font-semibold text-blue-600 hover:text-blue-700">
+          <button className="text-sm font-semibold text-[#134074] hover:underline">
             Raise a Complaint →
           </button>
         </div>
       </div>
 
+      {/* SIGN OUT */}
       <div className="px-6 mb-6">
-        <button className="w-full bg-red-50 text-red-600 py-3 rounded-xl font-semibold hover:bg-red-100 transition-colors flex items-center justify-center gap-2 border border-red-200">
+        <button className="w-full bg-[#eef4ed] text-red-600 py-3 rounded-xl font-semibold hover:bg-red-50 transition-all flex items-center justify-center gap-2 border border-red-200">
           <LogOut className="w-5 h-5" />
           Sign Out
         </button>
       </div>
 
+      {/* FOOTER */}
       <div className="px-6 mb-6">
-        <div className="text-center text-xs text-gray-500">
+        <div className="text-center text-xs text-[#13315c]/60">
           <p>GigShield v1.0.0</p>
           <p className="mt-1">© 2026 VisionCoders • IRDAI Compliant</p>
         </div>
