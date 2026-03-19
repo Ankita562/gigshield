@@ -9,7 +9,7 @@ Guidewire DEVTrails 2026 — Phase 1 Submission
 
 ## 1. Persona & Problem
 
-Food delivery partners (Zomato, Swiggy, Zepto, Blinkit) earn ₹700–₹1,200/day entirely from active working hours. When heavy rain, extreme heat, severe pollution (AQI > 300), or a Bandh hits — they earn ₹0 with no safety net. No insurance product exists for this.
+Food delivery partners (Zomato & Swiggy) earn ₹700–₹1,200/day entirely from active working hours. When heavy rain, extreme heat, severe pollution (AQI > 300), or a Bandh hits — they earn ₹0 with no safety net. No insurance product exists for this.
 
 **We insure lost time and wages only. No vehicles. No health. No accidents.**
 
