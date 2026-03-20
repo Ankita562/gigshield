@@ -3,7 +3,8 @@
 Guidewire DEVTrails 2026 — Phase 1 Submission
 
 **Team:** VisionCoders | BMS College of Engineering
-**Pitch Video:** [Link]
+
+**Pitch Video:** https://youtu.be/WxCLD85te1A?si=JBFcdDyCmFMkffiv
 > 🚨 **Market Crash Response included — Section 8: Adversarial Defense & Anti-Spoofing Strategy**
 ---
 
