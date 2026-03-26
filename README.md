@@ -2,14 +2,15 @@
 **AI-Powered Parametric Income Protection for India's Food Delivery Partners**
 Guidewire DEVTrails 2026 — Phase 1 Submission
 
-**Team:** VisionCoders | BMS College of Engineering |
-**Pitch Video:** [Link]
+**Team:** VisionCoders | BMS College of Engineering
 
+**Pitch Video:** https://youtu.be/WxCLD85te1A?si=JBFcdDyCmFMkffiv
+> 🚨 **Market Crash Response included — Section 8: Adversarial Defense & Anti-Spoofing Strategy**
 ---
 
 ## 1. Persona & Problem
 
-Food delivery partners (Zomato, Swiggy, Zepto, Blinkit) earn ₹700–₹1,200/day entirely from active working hours. When heavy rain, extreme heat, severe pollution (AQI > 300), or a Bandh hits — they earn ₹0 with no safety net. No insurance product exists for this.
+Food delivery partners (Zomato & Swiggy) earn ₹700–₹1,200/day entirely from active working hours. When heavy rain, extreme heat, severe pollution (AQI > 300), or a Bandh hits — they earn ₹0 with no safety net. No insurance product exists for this.
 
 **We insure lost time and wages only. No vehicles. No health. No accidents.**
 
@@ -17,7 +18,7 @@ Food delivery partners (Zomato, Swiggy, Zepto, Blinkit) earn ₹700–₹1,200/d
 
 ## 2. Platform
 
-**Mobile Application (React Native + Expo)**. Delivery partners rely exclusively on their smartphones to operate. Building a cross-platform React Native app allows us to maintain a single, highly efficient codebase for both Android and iOS, while giving us crucial access to native device capabilities like secure push notifications, background location validation (for fraud detection), and seamless UPI app deep-linking for instant payouts.
+**Mobile Application (ReactNative + Tailwind)**. Delivery partners rely exclusively on their smartphones to operate. A cross-platform React Native app gives us a single codebase for Android and iOS, with access to native device capabilities — secure push notifications, background location validation for fraud detection, and seamless UPI deep-linking for instant payouts.
 
 ---
 
@@ -97,20 +98,20 @@ This makes GigShield a daily earning assistant, not just a safety net.
 
 ## 6. Weekly Premium Model & AI
 
-Premium is calculated every **Sunday 11PM** by a Python Scikit-learn Gradient Boosting model.
+GigShield offers three coverage tiers, priced dynamically every Sunday by our 
+Scikit-learn Gradient Boosting model based on zone risk and forecast data.
 
-```
-Weekly Premium = ₹30 (base) × Risk Score
-Range: ₹20 (low risk) → ₹50 (high risk)
-```
+| Plan | Price | Triggers | Max Payout/Event |
+|---|---|---|---|
+| Basic Shield | ₹30/week | Rain >40mm, AQI >300 | ₹400 |
+| Standard Shield | ₹45/week | Rain >40mm, AQI >300, Heat ≥40°C, Wind >55km/h | ₹600 |
+| Premium Shield | ₹70/week | Rain >35mm, AQI >250, Heat ≥38°C, Wind >45km/h | ₹1,000 |
 
-**Inputs:** 7-day rainfall forecast, max temperature, AQI forecast, upcoming holidays, zone disruption history, worker claim history.
+Premium Shield has lower thresholds — it triggers earlier and pays more.
+Priority claim processing under 3 minutes. Premium lock guaranteed for 6 weeks.
 
-**Safeguards:** Week-over-week increase capped at +10%, decrease capped at -5%. Full breakdown shown to worker before payment — IRDAI transparency requirement.
-
-**Fraud Detection (Scikit-learn Isolation Forest):**
-Real-time anomaly scoring on every claim. Checks GPS zone match, VPN/IP spoofing, GPS consistency, and claim frequency. Score > 70 → manual review. Score > 90 → auto-hold. Every flag generates a human-readable reason for IRDAI auditability.
-
+Dynamic pricing adjusts the base of each tier every Sunday.
+Week-over-week changes capped at ±10% to prevent sudden shocks.
 ---
 
 ## 7. Parametric Triggers
@@ -127,7 +128,121 @@ Every trigger requires **two independent sources** to confirm before a payout fi
 
 ---
 
-## 8. IRDAI Compliance — Our Key Differentiator
+## 🚨 8. Adversarial Defense & Anti-Spoofing Strategy
+### Market Crash Response — Coordinated GPS Fraud Ring
+
+> *500 delivery partners are faking GPS locations. A coordinated fraud ring is draining the insurance pool. Simple GPS verification is dead. Here is how GigShield catches the fakers without punishing honest workers.*
+
+### The Problem: Why Simple GPS Fails
+
+A single GPS coordinate check is trivially defeated. Fake apps, VPNs, and mocked location APIs can spoof a worker into any zone in seconds. Our defense operates across **four independent layers** — any one layer failing does not compromise the system.
+
+---
+
+### Layer 1 — Device Fingerprinting at Onboarding
+
+When a worker registers, GigShield captures a unique device fingerprint:
+- Device ID + hardware hash
+- SIM card identifier
+- React Native's `expo-device` unique ID
+
+**One device = one policy.** If a second account attempts registration from the same device, it is blocked immediately. This defeats the ring's ability to run multiple fake accounts on the same phone.
+
+---
+
+### Layer 2 — GPS Behavioural Analysis (Catching Teleportation)
+
+A real delivery partner moves like a human. A fraud bot does not.
+
+Every 15 minutes while a policy is active, GigShield logs the worker's GPS coordinates. Before any payout fires, the AI checks the movement history:
+
+```
+Speed between two GPS points = Distance / Time elapsed
+
+If speed > 80 km/h in a city zone during peak hours → IMPOSSIBLE
+If location jumps from Koramangala to Whitefield in 4 minutes → TELEPORTATION FLAG
+If GPS coordinates are perfectly static for 2+ hours → MOCKED LOCATION FLAG
+```
+
+Real workers accelerate, decelerate, stop at restaurants, and move in delivery-shaped patterns. Fraud bots produce unnaturally clean, static, or impossible movement traces. Our Isolation Forest model is trained to detect exactly this.
+
+---
+
+### Layer 3 — Cross-Signal Corroboration (The Key Innovation)
+
+This is what separates GigShield from basic GPS checks.
+
+When a payout is triggered, we do not just check **where the worker says they are**. We check whether **multiple independent signals agree**:
+
+| Signal | What We Check |
+|---|---|
+| GPS location | Worker inside registered PIN code zone |
+| IP address geolocation | IP resolves to same city as claimed zone |
+| VPN detection | IP flagged by VPN blocklist → automatic hold |
+| Network cell tower | React Native `expo-location` cross-checks GPS with cell tower data |
+| Platform activity | Worker's Swiggy/Zomato app shows active orders in that zone |
+| Weather data | Claimed disruption actually exists in that PIN code per API |
+
+A genuine worker in Koramangala during a flood will pass all six checks naturally. A fraud bot faking GPS from a different city will fail at least two or three — IP geolocation, cell tower, and platform activity will all contradict the spoofed GPS.
+
+**Rule:** Any claim where 2 or more signals contradict the GPS → auto-hold + fraud queue.
+
+---
+
+### Layer 4 — Pool-Level Statistical Monitoring
+
+Individual claim checks catch individual fraudsters. Pool monitoring catches **coordinated rings**.
+
+Every hour, GigShield's admin dashboard computes:
+
+```
+Zone Claim Rate = Claims filed in zone / Active policies in zone
+```
+
+If a specific PIN code suddenly shows a claim rate 3x above its historical average — especially during a period when neighbouring PIN codes are unaffected — this is a coordinated ring signature, not a genuine weather event.
+
+**Response:**
+- All claims from that zone in the past 2 hours are frozen pending review
+- Admin is alerted immediately
+- Zone is flagged for enhanced verification for the next 48 hours
+
+This catches the fraud ring as a group, not just individual bad actors.
+
+---
+
+### How We Protect Honest Workers
+
+The biggest risk in fraud defense is punishing innocent people. GigShield's approach minimises this:
+
+- **Freeze, don't deny.** A flagged claim is held for human review, not automatically rejected. An honest worker whose GPS had a glitch gets their payout after a 2-hour review, not a permanent denial.
+- **Explainable flags.** Every hold generates a human-readable reason. The admin sees exactly why a claim was flagged — not just a score.
+- **Appeal button.** Any worker can dispute a held payout directly in the app. Dispute triggers a 24-hour manual review with raw API data shown to the reviewer.
+- **Fraud score decay.** A worker with one suspicious claim does not carry that flag forever. Score resets after 30 clean days.
+
+---
+
+### Anti-Spoofing Architecture Summary
+
+```mermaid
+flowchart TD
+    A[Claim Triggered] --> B[Layer 1: Device fingerprint check]
+    B -- Duplicate device --> Z[🚩 Auto Block]
+    B -- Clean --> C[Layer 2: GPS behaviour analysis]
+    C -- Teleportation / static mock --> Z
+    C -- Normal movement --> D[Layer 3: Cross-signal corroboration]
+    D -- 2+ signals contradict GPS --> Y[⏸️ Freeze + Human Review]
+    D -- All signals agree --> E[Layer 4: Pool-level zone check]
+    E -- Zone rate 3x above normal --> Y
+    E -- Normal zone rate --> F[✅ Payout Approved]
+
+    style Z fill:#ea4335,color:#fff
+    style Y fill:#fbbc04,color:#000
+    style F fill:#34a853,color:#fff
+```
+
+---
+
+## 9. IRDAI Compliance 
 
 > *"Most insurance products are built for two users — the customer and the insurer. GigShield adds a third: the IRDAI Inspector. Every payout, policy, and grievance is audit-ready from day one."*
 
@@ -156,15 +271,15 @@ flowchart LR
 | Grievance SLA (15 days) | Auto-escalation triggered at day 13 |
 | Claim settlement | Parametric = payout in under 5 minutes. Rule destroyed. |
 
-**Inspector Dashboard:** A dedicated admin view showing every policy, payout, API trigger, and grievance with full audit trail — built specifically for IRDAI auditors. 
+**Inspector Dashboard:** A dedicated admin view showing every policy, payout, API trigger, and grievance with full audit trail — built specifically for IRDAI auditors.
 
 ---
 
-## 9. Tech Stack
+## 10. Tech Stack
 
 | Layer | Technology |
 |---|---|
-| Frontend | React Native |
+| Frontend | ReactNative + Tailwind CSS |
 | Backend | Node.js + Express |
 | AI Service | Python + Flask + Scikit-learn |
 | Database | MongoDB |
@@ -176,19 +291,19 @@ Microservices architecture — AI service runs independently so ML models can be
 
 ---
 
-## 10. Development Plan
+## 11. Development Plan
 
 | Phase | Weeks | Deliverables |
 |---|---|---|
 | Seed | 1–2 | Schema, API setup, wireframes, README, pitch video |
-| Scale | 3–4 | React Native mobile app, Express backend, MongoDB, trigger engine, premium cron, Razorpay |
+| Scale | 3–4 | React Native app, Express backend, MongoDB, trigger engine, premium cron, Razorpay |
 | Soar | 5–6 | Fraud model, Inspector dashboard, nudge engine, WhatsApp alerts, 5-min demo video |
 
-**Demo Day scenario:** Live rain trigger fires for Bengaluru PIN 560034 → GPS validated → fraud check passes → UPI payout in under 5 minutes → Inspector dashboard shows full audit trail.
+**Demo Day scenario:** Live rain trigger fires for Bengaluru PIN 560034 → GPS validated → cross-signal corroboration passes → fraud check clean → UPI payout in under 5 minutes → Inspector dashboard shows full audit trail.
 
 ---
 
-## 11. Team
+## 12. Team
 
 | Name | Role |
 |---|---|
@@ -201,4 +316,4 @@ Microservices architecture — AI service runs independently so ML models can be
 ---
 
 *GigShield — Parametric income protection for Bharat's invisible workforce.*
-*Deadline: March 20, End of Day*
+*Deadline: March 20, 11:59 PM*
