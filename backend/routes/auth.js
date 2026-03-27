@@ -5,9 +5,9 @@ import Policy from "../models/Policy.js";
 const router = express.Router();
 
 router.post("/register", async (req, res) => {
-  const { name, phone, location, nominee } = req.body;
+  const { name, phone, platform_id,upi_id,nominee } = req.body;
 
-  const user = await User.create({ name, phone, location, nominee });
+  const user = await User.create({ name, phone, platform_id, upi_id, nominee });
 
   const policy = await Policy.create({
     userId: user._id,
