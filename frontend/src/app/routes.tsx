@@ -58,17 +58,24 @@ import { Payouts } from "./pages/Payouts";
 import { Policy } from "./pages/Policy";
 import { Profile } from "./pages/Profile";
 import { PremiumSelection } from "./pages/PremiumSelection";
-import { Auth } from "./pages/Auth";
-import { Login } from "./pages/Login";
-
+import { Auth,RequireAuth } from "./pages/Auth";
+import { Signup } from "./pages/Signup";
+import {Login} from "./pages/Login";
 export const router = createBrowserRouter([
   {
     path: "/login",
     element: <Login />,
   },
   {
+    path:"/signup",
+    element:<Signup/>,
+  },
+  {
     path: "/",
-    element: <Home />,
+    element:(<RequireAuth>
+        <Home />
+      </RequireAuth>
+    ),
   },
   {
     path: "/forecast",
@@ -84,7 +91,10 @@ export const router = createBrowserRouter([
   },
   {
     path: "/profile",
-    element: <Profile />,
+    element: (<RequireAuth>
+        <Profile />
+      </RequireAuth>
+    ),
   },
   {
     path: "/premium",

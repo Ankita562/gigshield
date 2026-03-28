@@ -1,7 +1,10 @@
 import mongoose from "mongoose";
 
 const claimSchema = new mongoose.Schema({
-  userId: String,
+  userId: {
+  type: mongoose.Schema.Types.ObjectId,
+  ref: "User",
+},
   amount: Number,
   status: { type: String, default: "approved" },
   reason: String,

@@ -1,8 +1,18 @@
 import { MobileLayout } from '../components/MobileLayout';
 import { Shield, User, Users, Phone, Briefcase, Wallet, ChevronRight, CheckCircle, Info } from 'lucide-react';
-import { useState } from 'react';
+import { ReactNode, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Navigate } from "react-router-dom";
 
+export function RequireAuth({ children }: { children: ReactNode }) {
+  const user = localStorage.getItem("gigshield_user");
+
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return children;
+}
 export function Auth() {
   const navigate = useNavigate();
   const [isLogin, setIsLogin] = useState(false);
