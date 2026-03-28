@@ -1,21 +1,18 @@
 import { MobileLayout } from '../components/MobileLayout';
 import { User, Phone, MapPin, CreditCard, Users, HelpCircle, FileText, LogOut, ChevronRight } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-
+import { useEffect } from "react";
 
 export function Profile() {
   const navigate = useNavigate();
-  
-  const userData = {
-    name: 'Rajesh Kumar',
-    phone: '+91 98765 43210',
-    location: 'Bengaluru, PIN 560034',
-    upiId: 'rajesh.kumar@paytm',
-    platform: 'Zomato',
-    nominee: 'Priya Kumar (Wife)',
-    joinDate: 'Feb 15, 2026',
-  };
+  const userData = JSON.parse(localStorage.getItem("gigshield_user") || "null");
+  useEffect(()=>{
+  if (!userData) {
+  navigate("/login");
+}
+}, [userData, navigate]);
 
+if (!userData) return null;
   // const handleSignOut = () => {
   //   // Clear all user data from localStorage
   //   localStorage.removeItem('gigshield_user');
@@ -41,12 +38,11 @@ const handleSignOut = () => {
         <div className="bg-white rounded-xl shadow-lg p-5 border border-gray-100">
           <div className="flex items-center gap-4">
             <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-full flex items-center justify-center text-white text-2xl font-bold">
-              {userData.name.split(' ').map(n => n[0]).join('')}
+              {userData.name.split(' ').map((n: any[]) => n[0]).join('')}
             </div>
             <div>
               <p className="font-bold text-gray-900 text-lg">{userData.name}</p>
-              <p className="text-sm text-gray-600">{userData.platform} Partner</p>
-              <p className="text-xs text-gray-500 mt-1">Member since {userData.joinDate}</p>
+              <p className="text-sm text-gray-600">{userData.platform_id} Partner</p>
             </div>
           </div>
         </div>
@@ -80,7 +76,7 @@ const handleSignOut = () => {
             </div>
             <div className="flex-1">
               <p className="text-xs text-gray-500">UPI ID</p>
-              <p className="font-semibold text-gray-900">{userData.upiId}</p>
+              <p className="font-semibold text-gray-900">{userData.upi_id}</p>
             </div>
           </div>
 

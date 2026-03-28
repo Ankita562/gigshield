@@ -1,23 +1,42 @@
 import { MobileLayout } from '../components/MobileLayout';
 import { Shield, CloudRain, Wind, AlertTriangle, CheckCircle, TrendingUp, Sparkles, Zap, Clock } from 'lucide-react';
 import { Link } from 'react-router-dom';
-
+import {useState,useEffect} from 'react';
 export function Home() {
-  const mockData = {
-    policyActive: true,
-    weeklyPremium: 36,
-    currentRisk: 'medium',
-    location: 'Bengaluru, PIN 560034',
-    todayWeather: {
-      temp: 33,
-      rainfall: 15,
-      aqi: 185,
-    },
-    nextPayout: null,
-    thisWeekEarnings: 4800,
-    protectedDays: 2,
-  };
-
+  // const mockData = {
+  //   policyActive: true,
+  //   weeklyPremium: 36,
+  //   currentRisk: 'medium',
+  //   location: 'Bengaluru, PIN 560034',
+  //   todayWeather: {
+  //     temp: 33,
+  //     rainfall: 15,
+  //     aqi: 185,
+  //   },
+  //   nextPayout: null,
+  //   thisWeekEarnings: 4800,
+  //   protectedDays: 2,
+  // };
+  const [policy, setPolicy] = useState<any>(null);
+  const user=JSON.parse(localStorage.getItem("gigshield_user") || "null");
+  if (!user) {
+  return <p>Please login</p>;
+}
+  useEffect(() => {
+if(!user._id)return;
+  fetch(`http://localhost:5000/api/dashboard/${user._id}`)
+    .then(res => res.json())
+    .then(data => {  console.log("API DATA:", data);setPolicy(data);})
+    .catch(err=>console.log("error",err));
+}, [user]);
+if (!policy) {
+  return (
+    <MobileLayout>
+      <p className="text-center mt-10">Loading...</p>
+    </MobileLayout>
+  );
+}
+const weather = policy?.todayWeather || {};
   return (
     <MobileLayout>
       {/* Hero Header - Oxford Navy to Prussian Blue */}
@@ -37,7 +56,7 @@ export function Home() {
           </div>
           <p className="text-[#8da9c4] text-sm flex items-center gap-2 ml-1">
             <span className="w-2 h-2 bg-emerald-400 rounded-full"></span>
-            {mockData.location}
+            {user.location}
           </p>
         </div>
       </div>
@@ -62,7 +81,7 @@ export function Home() {
           <div className="pt-4 border-t border-[#8da9c4]/40 grid grid-cols-2 gap-4">
             <div>
               <p className="text-xs text-[#13315c]/70 mb-1 font-medium">Weekly Premium</p>
-              <p className="text-2xl font-bold text-[#134074]">₹{mockData.weeklyPremium}</p>
+              <p className="text-2xl font-bold text-[#134074]">₹{policy.weeklyPremium||0}</p>
             </div>
             <div className="text-right">
               <p className="text-xs text-[#13315c]/70 mb-1 font-medium">Next Payment</p>
@@ -87,7 +106,7 @@ export function Home() {
               <CloudRain className="w-6 h-6 text-[#134074]" strokeWidth={2.5} />
             </div>
             <p className="text-xs text-[#13315c]/70 mb-1.5 font-medium">Rainfall</p>
-            <p className="text-2xl font-bold text-[#0b2545]">{mockData.todayWeather.rainfall}<span className="text-sm text-[#13315c]/60 font-normal ml-0.5">mm</span></p>
+            <p className="text-2xl font-bold text-[#0b2545]">{weather.rainfall || 0}<span className="text-sm text-[#13315c]/60 font-normal ml-0.5">mm</span></p>
             <div className="mt-2.5 flex items-center gap-1.5">
               <div className="w-1.5 h-1.5 bg-amber-500 rounded-full"></div>
               <p className="text-xs font-semibold text-amber-600">Moderate</p>
@@ -98,7 +117,7 @@ export function Home() {
               <Wind className="w-6 h-6 text-[#134074]" strokeWidth={2.5} />
             </div>
             <p className="text-xs text-[#13315c]/70 mb-1.5 font-medium">AQI</p>
-            <p className="text-2xl font-bold text-[#0b2545]">{mockData.todayWeather.aqi}</p>
+            <p className="text-2xl font-bold text-[#0b2545]">{weather.aqi||0}</p>
             <div className="mt-2.5 flex items-center gap-1.5">
               <div className="w-1.5 h-1.5 bg-orange-500 rounded-full"></div>
               <p className="text-xs font-semibold text-orange-600">Moderate</p>
@@ -109,7 +128,7 @@ export function Home() {
               <TrendingUp className="w-6 h-6 text-[#134074]" strokeWidth={2.5} />
             </div>
             <p className="text-xs text-[#13315c]/70 mb-1.5 font-medium">Temp</p>
-            <p className="text-2xl font-bold text-[#0b2545]">{mockData.todayWeather.temp}<span className="text-sm text-[#13315c]/60 font-normal ml-0.5">°C</span></p>
+            <p className="text-2xl font-bold text-[#0b2545]">{weather.temp||0}<span className="text-sm text-[#13315c]/60 font-normal ml-0.5">°C</span></p>
             <div className="mt-2.5 flex items-center gap-1.5">
               <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></div>
               <p className="text-xs font-semibold text-emerald-600">Normal</p>
@@ -143,7 +162,7 @@ export function Home() {
           <div className="grid grid-cols-2 gap-6 mb-5">
             <div>
               <p className="text-xs text-[#13315c]/70 uppercase tracking-wide mb-2 font-semibold">Total Earnings</p>
-              <p className="text-3xl font-bold text-[#0b2545]">₹{mockData.thisWeekEarnings.toLocaleString()}</p>
+              <p className="text-3xl font-bold text-[#0b2545]">₹{(policy.thisWeekEarnings ||0).toLocaleString()}</p>
               <div className="mt-2.5 flex items-center gap-1.5 text-emerald-600">
                 <TrendingUp className="w-4 h-4" strokeWidth={2.5} />
                 <span className="text-xs font-semibold">+12% vs last week</span>
@@ -151,7 +170,7 @@ export function Home() {
             </div>
             <div>
               <p className="text-xs text-[#13315c]/70 uppercase tracking-wide mb-2 font-semibold">Protected Days</p>
-              <p className="text-3xl font-bold text-[#134074]">{mockData.protectedDays}</p>
+              <p className="text-3xl font-bold text-[#134074]">{policy.protectedDays||0}</p>
               <div className="mt-2.5 flex items-center gap-1.5">
                 <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></div>
                 <span className="text-xs font-semibold text-emerald-600">Coverage Active</span>
