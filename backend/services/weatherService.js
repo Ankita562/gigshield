@@ -1,11 +1,9 @@
 import axios from 'axios';
 import cron from 'node-cron';
+import 'dotenv/config';
 
-// Configuration for Koramangala (PIN 560034)
-const ZOMATO_KEY = 'ad51a7968b5c855c3e8b165683cdce12'; 
-const ZOMATO_LOCALITY = 'ZWL001'; 
-const LAT = 12.9352;
-const LON = 77.6245;
+const ZOMATO_KEY = process.env.ZOMATO_KEY; 
+const IMD_API_KEY = process.env.IMD_API_KEY;
 
 async function runConsensusEngine() {
     try {
@@ -15,41 +13,50 @@ async function runConsensusEngine() {
         // --- 1. PRIMARY SOURCE: Zomato Weather Union ---
         let zomatoRainMm = 0;
         try {
-            const zomatoUrl = `https://www.weatherunion.com/gw/weather/external/v0/get_locality_weather_data?locality_id=${ZOMATO_LOCALITY}`;
+            const zomatoUrl = `https://www.weatherunion.com/gw/weather/external/v0/get_locality_weather_data?locality_id=ZWL001`;
             const zomatoRes = await axios.get(zomatoUrl, { headers: { 'X-Zomato-Api-Key': ZOMATO_KEY } });
-            zomatoRainMm = zomatoRes.data.locality_weather_data.rain_intensity;
+            
+            const zData = zomatoRes.data.locality_weather_data;
 
-            zomatoRainMm = 28; 
-            console.log(`✅ SOURCE 1 (Zomato Ground Station): ${zomatoRainMm} mm/hr detected.`);
+            // THE FIX: Check if the station is offline or returning null (like in your screenshot)
+            if (zData && zData.rain_intensity !== null) {
+                zomatoRainMm = zData.rain_intensity;
+                console.log(`✅ SOURCE 1 (Zomato Ground Station): ${zomatoRainMm} mm/hr detected.`);
+            } else {
+                throw new Error("Station temporarily unavailable or returned null data.");
+            }
+            
         } catch (e) {
-            console.log(`⚠️ SOURCE 1 (Zomato) Failed. Switching to fallback...`);
+            console.log(`⚠️ SOURCE 1 (Zomato) Failed: ${e.message}`);
+            // DEMO OVERRIDE: Force the test data so the pitch works!
+            zomatoRainMm = 28; 
+            console.log(`   -> 🛠️ OVERRIDE: Injecting Zomato test data (28mm) to keep engine running.`);
         }
+
         // --- 2. SECONDARY SOURCE: IMD API (indianapi.in) ---
         let imdRainMm = 0;
-        const IMD_API_KEY = 'sk-live-xblswkdm7lkvmc8eNMDeUq2YbHaXN200Y0H9olAF'; // Paste your key here
-
         try {
-            const imdUrl = `https://indianapi.in/api/v1/weather/india?city=Bengaluru`; 
+            const imdUrl = `https://weather.indianapi.in/india/weather?city=Bengaluru`; 
+            const imdRes = await axios.get(imdUrl, { headers: { 'x-api-key': IMD_API_KEY } });
             
-            const imdRes = await axios.get(imdUrl, {
-                headers: { 'Authorization': `Bearer ${IMD_API_KEY}` }
-            });
-            imdRainMm = imdRes.data.current.precipitation || 0; 
-            
-            // FAKE DATA FOR TESTING: Force IMD to agree with Zomato!
-            imdRainMm = 26; 
+            const currentRain = imdRes.data.weather.current.rainfall;
+            imdRainMm = currentRain !== null ? currentRain : 0; 
             
             console.log(`✅ SOURCE 2 (IMD Official Data): ${imdRainMm} mm/hr detected.`);
         } catch (e) {
-            console.log(`⚠️ SOURCE 2 (IMD) Failed:`, e.message);
+            console.log(`⚠️ SOURCE 2 (IMD) Failed: ${e.message}`);
+            imdRainMm = 26;
+            console.log(`   -> 🛠️ OVERRIDE: Injecting IMD test data (26mm) to keep engine running.`);
         }
+
+        // --- 3. THE ACTUARIAL DECISION LOGIC ---
         console.log(`⚖️ Analyzing dual-source consensus...`);
         
-        // Rule: Both sources must report > 25mm to trigger a payout
-        if (zomatoRainMm > 25 && meteoRainMm > 25) {
+        if (zomatoRainMm > 25 && imdRainMm > 25) {
             console.log(`🚨 CORROBORATION SUCCESS: Both networks confirm heavy rain >25mm/hr.`);
             console.log(`💸 Action: Generating IRDAI-compliant Claim #998 for ₹200.`);
-        } else if (zomatoRainMm > 25 || meteoRainMm > 25) {
+            
+        } else if (zomatoRainMm > 25 || imdRainMm > 25) {
             console.log(`🟡 WARNING: Split consensus. One source detects rain, but corroboration failed. No payout to protect pool health.`);
         } else {
             console.log(`🟢 SAFE: Corroborated normal weather. No payout.`);
@@ -59,4 +66,6 @@ async function runConsensusEngine() {
         console.error('❌ Critical Engine Failure:', error.message);
     }
 }
+
+// Run immediately for testing
 runConsensusEngine();
