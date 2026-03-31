@@ -51,6 +51,7 @@
 //     element: <Navigate to="/Login" replace />,
 //   },
 // ]);
+import AdminDashboard from './pages/AdminDashboard'; 
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import { Home } from "./pages/Home";
 import { Forecast } from "./pages/Forecast";
@@ -107,5 +108,9 @@ export const router = createBrowserRouter([
   {
     path: "*",
     element: <Navigate to="/login" replace />,
+  },
+  {
+  path: "/admin",
+  element: <AdminDashboard />,
   },
 ]);
