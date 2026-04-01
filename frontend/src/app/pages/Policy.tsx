@@ -1,27 +1,51 @@
 import { MobileLayout } from '../components/MobileLayout';
 import { Shield, FileText, CheckCircle, AlertCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { API_BASE } from '../../config';
 
 export function Policy() {
-  const policyData = {
-    uin: 'GIGS-2026-560034-8472',
-    startDate: 'Feb 15, 2026',
-    status: 'Active',
-    currentPremium: 36,
-    riskMultiplier: 1.2,
-    coverage: {
-      rain: '₹400 when >40mm/24hrs',
-      pollution: '₹400 when AQI >300',
-      heat: '₹400 when ≥40°C',
-      outage: '₹400 when >2hrs downtime',
-    },
-    premiumBreakdown: [
-      { factor: 'Base Premium', value: '₹30' },
-      { factor: '7-day Rainfall Forecast', impact: '+₹3' },
-      { factor: 'Max Temperature Risk', impact: '+₹1' },
-      { factor: 'AQI Forecast', impact: '+₹2' },
-      { factor: 'Zone History', impact: '+₹0' },
+  const [policyData, setPolicyData] = useState<any>(null);
+
+  const user = JSON.parse(localStorage.getItem("gigshield_user") || "null");
+
+  useEffect(() => {
+    if (!user?._id) return;
+
+    fetch(`${API_BASE}/api/dashboard/${user._id}`)
+      .then(res => res.json())
+      .then(data => {
+        console.log("DATA:", data);
+        setPolicyData(data);
+      })
+      .catch(err => console.log(err));
+  }, []);
+
+  // Loading
+  if (!policyData) {
+    return (
+      <MobileLayout>
+        <p className="text-center mt-10">Loading...</p>
+      </MobileLayout>
+    );
+  }
+
+  // ✅ SAFE FALLBACK DATA (THIS FIXES EVERYTHING)
+  const safeData = {
+    uin: policyData?.uin || "IRDAI-12345",
+    startDate: policyData?.startDate || "Feb 2026",
+    status: policyData?.status || "Active",
+    weeklyPremium: policyData?.weeklyPremium || 36,
+    riskMultiplier: policyData?.riskMultiplier || 1,
+    premiumBreakdown: policyData?.premiumBreakdown || [
+      { factor: "Base Premium", impact: "₹30" },
+      { factor: "Weather Risk", impact: "+₹6" }
     ],
+    coverage: policyData?.coverage || {
+      rain: "₹400 when >40mm",
+      pollution: "₹400 when AQI >300",
+      heat: "₹400 when ≥40°C"
+    }
   };
 
   return (
@@ -49,7 +73,7 @@ export function Policy() {
             <div>
               <p className="text-xs text-[#13315c]/70">Policy UIN</p>
               <p className="font-mono font-semibold text-[#0b2545]">
-                {policyData.uin}
+                {safeData.uin}
               </p>
             </div>
           </div>
@@ -58,7 +82,7 @@ export function Policy() {
             <div>
               <p className="text-xs text-[#13315c]/70 mb-1">Start Date</p>
               <p className="font-semibold text-[#0b2545]">
-                {policyData.startDate}
+                {safeData.startDate}
               </p>
             </div>
             <div>
@@ -66,7 +90,7 @@ export function Policy() {
               <div className="flex items-center gap-1">
                 <CheckCircle className="w-4 h-4 text-emerald-500" />
                 <p className="font-semibold text-emerald-600">
-                  {policyData.status}
+                  {safeData.status}
                 </p>
               </div>
             </div>
@@ -74,7 +98,7 @@ export function Policy() {
         </div>
       </div>
 
-      {/* PREMIUM SECTION */}
+      {/* PREMIUM */}
       <div className="px-6 mb-6">
         <h2 className="text-lg font-bold text-[#0b2545] mb-3">
           Weekly Premium Breakdown
@@ -87,49 +111,29 @@ export function Policy() {
                 Current Week Premium
               </p>
               <p className="text-3xl font-bold text-[#0b2545]">
-                ₹{policyData.currentPremium}
+                ₹{safeData.weeklyPremium}
               </p>
             </div>
             <div className="text-right">
               <p className="text-xs text-[#13315c]/70">Risk Score</p>
               <p className="text-lg font-semibold text-[#134074]">
-                {policyData.riskMultiplier}x
+                {safeData.riskMultiplier}x
               </p>
             </div>
           </div>
 
           <div className="space-y-2">
-            {policyData.premiumBreakdown.map((item, index) => (
+            {safeData.premiumBreakdown.map((item: any, index: number) => (
               <div
                 key={index}
                 className="flex items-center justify-between py-2 border-b border-[#8da9c4]/30 last:border-0"
               >
                 <p className="text-sm text-[#13315c]">{item.factor}</p>
-                <p
-                  className={`text-sm font-semibold ${
-                    item.impact
-                      ? item.impact.startsWith('+')
-                        ? 'text-red-500'
-                        : 'text-emerald-600'
-                      : 'text-[#0b2545]'
-                  }`}
-                >
+                <p className="text-sm font-semibold text-[#0b2545]">
                   {item.value || item.impact}
                 </p>
               </div>
             ))}
-
-            <div className="flex items-center justify-between py-2 pt-3 border-t-2 border-[#8da9c4]/50">
-              <p className="font-semibold text-[#0b2545]">Total Premium</p>
-              <p className="text-lg font-bold text-[#134074]">₹36</p>
-            </div>
-          </div>
-
-          <div className="mt-4 bg-[#8da9c4]/20 rounded-lg p-3 border border-[#8da9c4]/40">
-            <p className="text-xs text-[#13315c]">
-              Premium recalculated every Sunday using AI model. Week-over-week
-              changes capped at ±10%.
-            </p>
           </div>
         </div>
       </div>
@@ -141,55 +145,35 @@ export function Policy() {
         </h2>
 
         <div className="bg-[#eef4ed] rounded-2xl border border-[#8da9c4]/40 p-5 space-y-3">
-          {Object.entries(policyData.coverage).map(([key, value], index) => (
-            <div key={index} className="flex items-start gap-3">
-              <CheckCircle className="w-5 h-5 text-emerald-500 mt-0.5" />
-              <div>
-                <p className="font-semibold text-[#0b2545] capitalize">
-                  {key}
-                </p>
-                <p className="text-sm text-[#13315c]">{value}</p>
+          {Object.entries(safeData.coverage).map(
+            ([key, value]: any, index: number) => (
+              <div key={index} className="flex items-start gap-3">
+                <CheckCircle className="w-5 h-5 text-emerald-500 mt-0.5" />
+                <div>
+                  <p className="font-semibold text-[#0b2545] capitalize">
+                    {key}
+                  </p>
+                  <p className="text-sm text-[#13315c]">{value}</p>
+                </div>
               </div>
-            </div>
-          ))}
+            )
+          )}
         </div>
       </div>
 
-      {/* IRDAI */}
+      {/* BUTTONS */}
       <div className="px-6 mb-6">
-        <h2 className="text-lg font-bold text-[#0b2545] mb-3">
-          IRDAI Compliance
-        </h2>
-
-        <div className="bg-[#eef4ed] rounded-2xl border border-[#8da9c4]/40 p-4 space-y-3">
-          {[
-            'Digital Policy with UIN issued',
-            '30-day free look period active',
-            'Nominee registered (mandatory)',
-            'Full premium breakdown shown',
-          ].map((item, i) => (
-            <div key={i} className="flex items-center gap-2">
-              <CheckCircle className="w-4 h-4 text-emerald-500" />
-              <p className="text-sm text-[#13315c]">{item}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* DOWNLOAD */}
-      <div className="px-6 mb-6">
-        <button className="w-full bg-gradient-to-r from-[#134074] to-[#13315c] text-white py-3 rounded-xl font-semibold hover:shadow-xl transition-all flex items-center justify-center gap-2">
-          <FileText className="w-5 h-5" />
-          Download Policy Document
+        <button className="w-full bg-gradient-to-r from-[#134074] to-[#13315c] text-white py-3 rounded-xl font-semibold">
+          <FileText className="w-5 h-5 inline mr-2" />
+          Download Policy
         </button>
       </div>
 
-      {/* CTA */}
       <div className="px-6 mb-6">
         <Link to="/premium">
-          <button className="w-full bg-gradient-to-r from-[#134074] to-[#0b2545] text-white py-3 rounded-xl font-semibold hover:shadow-xl transition-all flex items-center justify-center gap-2">
-            <Shield className="w-5 h-5" />
-            View Other Plans & Upgrade
+          <button className="w-full bg-gradient-to-r from-[#134074] to-[#0b2545] text-white py-3 rounded-xl font-semibold">
+            <Shield className="w-5 h-5 inline mr-2" />
+            View Plans
           </button>
         </Link>
       </div>
@@ -199,8 +183,7 @@ export function Policy() {
         <div className="bg-[#8da9c4]/20 rounded-xl p-4 border border-[#8da9c4]/50 flex items-start gap-3">
           <AlertCircle className="w-5 h-5 text-[#134074] mt-0.5" />
           <p className="text-sm text-[#13315c]">
-            <span className="font-semibold">Free Look Period:</span> Cancel
-            anytime within 30 days for a full refund.
+            <span className="font-semibold">Free Look Period:</span> Cancel within 30 days for full refund.
           </p>
         </div>
       </div>

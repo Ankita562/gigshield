@@ -1,6 +1,9 @@
 import { MobileLayout } from '../components/MobileLayout';
 import { Shield, User, Users, Phone, Briefcase, Wallet, ArrowRight, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import { useState } from 'react';
+import { API_BASE } from '../../config';
+
+
 import { useNavigate } from 'react-router-dom';
 
 export function Signup() {
@@ -73,8 +76,8 @@ export function Signup() {
     setIsSubmitting(true);
 
     try {
-      // Replace with your actual API endpoint
-      const response = await fetch('http://localhost:5000/api/register', {
+      // Then replace the fetch line
+const response = await fetch(`${API_BASE}/api/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
