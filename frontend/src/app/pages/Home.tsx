@@ -2,7 +2,8 @@ import { MobileLayout } from '../components/MobileLayout';
 import { Shield, CloudRain, Wind, AlertTriangle, CheckCircle, TrendingUp, Sparkles, Zap } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
-import { API_BASE } from '../../config';
+import { API_BASE } from '../../config'
+import {FloatingHelpButton } from '../components/FloatingHelpButton';
 
 const getNextSunday = () => {
   const d = new Date();
@@ -38,6 +39,7 @@ export function Home() {
     return (
       <MobileLayout>
         <p className="text-center mt-10">Loading...</p>
+      <FloatingHelpButton/>
       </MobileLayout>
     );
   }
@@ -236,7 +238,9 @@ export function Home() {
       </div>
 
       {/* View All Plans CTA */}
-      <div className="px-6 mb-6">
+   {/* View All Plans CTA */}
+      {/* View All Plans CTA */}
+      <div className="px-6 mb-24"> 
         <Link to="/premium">
           <button className="w-full bg-gradient-to-r from-[#134074] to-[#0b2545] text-white py-4 rounded-xl font-bold hover:shadow-2xl transition-all flex items-center justify-center gap-2.5 group">
             <Sparkles className="w-5 h-5 group-hover:rotate-12 transition-transform" strokeWidth={2.5} />
@@ -248,6 +252,10 @@ export function Home() {
           Compare Basic, Standard, and Premium plans • Upgrade anytime
         </p>
       </div>
+
+      {/* Floating Button stays inside the Layout */}
+      <FloatingHelpButton /> 
+
     </MobileLayout>
   );
 }

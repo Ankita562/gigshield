@@ -62,6 +62,7 @@ import { PremiumSelection } from "./pages/PremiumSelection";
 import { Auth,RequireAuth } from "./pages/Auth";
 import { Signup } from "./pages/Signup";
 import {Login} from "./pages/Login";
+import  { Help }  from "./pages/Help";
 export const router = createBrowserRouter([
   {
     path: "/login",
@@ -108,6 +109,10 @@ export const router = createBrowserRouter([
   {
     path: "*",
     element: <Navigate to="/login" replace />,
+  },
+  {
+    path: "/help",
+    element: <Help />,
   },
   {
   path: "/admin",
