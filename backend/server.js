@@ -5,7 +5,8 @@ import dotenv from "dotenv";
 import authRoutes from "./routes/auth.js";
 import policyRoutes from "./routes/policy.js";
 import claimRoutes from "./routes/claim.js";
-
+import "./services/weatherService.js";
+import forecastRoutes from "./routes/forecast.js";
 
 dotenv.config();
 
@@ -15,6 +16,7 @@ app.use(express.json());
 app.use("/api", authRoutes);
 app.use("/api", policyRoutes);
 app.use("/api", claimRoutes);
+app.use("/api",forecastRoutes);
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log("MongoDB Connected"))
   .catch(err => console.log(err));

@@ -1,16 +1,17 @@
 import { MobileLayout } from '../components/MobileLayout';
 import { CloudRain, Wind, Thermometer, AlertCircle, CheckCircle } from 'lucide-react';
-
+import {useState,useEffect} from 'react';
 export function Forecast() {
-  const forecast = [
-    { day: 'Mon', date: 'Mar 17', rainfall: 5, temp: 32, aqi: 145, risk: 'low', riskScore: 25, payoutChance: 5 },
-    { day: 'Tue', date: 'Mar 18', rainfall: 8, temp: 33, aqi: 185, risk: 'low', riskScore: 35, payoutChance: 10 },
-    { day: 'Wed', date: 'Mar 19', rainfall: 25, temp: 31, aqi: 210, risk: 'medium', riskScore: 60, payoutChance: 40 },
-    { day: 'Thu', date: 'Mar 20', rainfall: 48, temp: 29, aqi: 195, risk: 'high', riskScore: 85, payoutChance: 90  },
-    { day: 'Fri', date: 'Mar 21', rainfall: 35, temp: 30, aqi: 220, risk: 'medium', riskScore: 65, payoutChance: 50 },
-    { day: 'Sat', date: 'Mar 22', rainfall: 12, temp: 32, aqi: 175, risk: 'low', riskScore: 30, payoutChance: 10 },
-    { day: 'Sun', date: 'Mar 23', rainfall: 6, temp: 33, aqi: 160, risk: 'low', riskScore: 20, payoutChance: 5 },
-  ];
+ const [forecast, setForecast] = useState<any[]>([]);
+const user = JSON.parse(localStorage.getItem("gigshield_user") || "null");
+useEffect(() => {
+  fetch(`http://localhost:5000/api/forecast/${user._id}`)
+    .then(res => res.json())
+    .then(data => setForecast(data))
+    .catch(err => console.log(err));
+}, []);
+
+
 
   return (
     <MobileLayout>

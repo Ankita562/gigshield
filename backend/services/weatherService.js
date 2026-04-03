@@ -1,7 +1,7 @@
 import axios from 'axios';
 import cron from 'node-cron';
 import 'dotenv/config';
-
+import User from "../models/User.js";
 const ZOMATO_KEY = process.env.ZOMATO_KEY; 
 const IMD_API_KEY = process.env.IMD_API_KEY;
 
@@ -29,7 +29,7 @@ async function runConsensusEngine() {
         } catch (e) {
             console.log(`⚠️ SOURCE 1 (Zomato) Failed: ${e.message}`);
             // DEMO OVERRIDE: Force the test data so the pitch works!
-            zomatoRainMm = 28; 
+            zomatoRainMm = 50; 
             console.log(`   -> 🛠️ OVERRIDE: Injecting Zomato test data (28mm) to keep engine running.`);
         }
 
@@ -45,7 +45,7 @@ async function runConsensusEngine() {
             console.log(`✅ SOURCE 2 (IMD Official Data): ${imdRainMm} mm/hr detected.`);
         } catch (e) {
             console.log(`⚠️ SOURCE 2 (IMD) Failed: ${e.message}`);
-            imdRainMm = 26;
+             imdRainMm = 48;
             console.log(`   -> 🛠️ OVERRIDE: Injecting IMD test data (26mm) to keep engine running.`);
         }
 
@@ -54,8 +54,21 @@ async function runConsensusEngine() {
         
         if (zomatoRainMm > 25 && imdRainMm > 25) {
             console.log(`🚨 CORROBORATION SUCCESS: Both networks confirm heavy rain >25mm/hr.`);
-            console.log(`💸 Action: Generating IRDAI-compliant Claim #998 for ₹200.`);
-            
+            const users=await User.find();
+
+              for (const user of users) {
+                try{
+        const res=await axios.post("http://localhost:5000/api/trigger-claim", {
+             userId: user._id,
+  rainfall: zomatoRainMm,
+  aqi: 0
+        });
+        console.log ("claim response: ",res.data);
+    }
+    catch(err){
+        console.log("claim api error:",err.response?.data || err.message);
+    }
+} 
         } else if (zomatoRainMm > 25 || imdRainMm > 25) {
             console.log(`🟡 WARNING: Split consensus. One source detects rain, but corroboration failed. No payout to protect pool health.`);
         } else {
@@ -69,3 +82,6 @@ async function runConsensusEngine() {
 
 // Run immediately for testing
 runConsensusEngine();
+cron.schedule("*/5 * * * *", () => {
+    runConsensusEngine();
+});

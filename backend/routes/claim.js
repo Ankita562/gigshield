@@ -1,20 +1,29 @@
 import express from "express";
 import Policy from "../models/Policy.js";
 import Claim from "../models/Claim.js";
-
+import mongoose from "mongoose";
 const router = express.Router();
 router.get("/dashboard/:userId", async (req, res) => {
-  const policy = await Policy.findOne({ userId: req.params.userId });
+  const policy = await Policy.findOne({ userId:req.params.userId });
   res.json(policy);
+});
+
+router.get("/claims/:userId", async (req, res) => {
+  try {
+    const claims = await Claim.find({ userId: req.params.userId }).sort({ createdAt: -1 });
+    res.json(claims);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 router.post("/trigger-claim", async (req, res) => {
   try {
     const { userId, rainfall, aqi } = req.body;
 
-    const policy = await Policy.findOne({ userId });
+    const policy = await Policy.findOne({ userId:userId  });
 
-    if (!policy || !policy.active) {
+    if (!policy || policy.status!=="active") {
       return res.status(400).json({ message: "No active policy" });
     }
 

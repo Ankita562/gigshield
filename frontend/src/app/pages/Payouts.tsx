@@ -1,6 +1,13 @@
 import { MobileLayout } from '../components/MobileLayout';
 import { CheckCircle, CloudRain, Wind, Zap, ThermometerSun, CloudDrizzle, Filter, TrendingUp, AlertCircle, Sparkles, Info } from 'lucide-react';
-import { useState } from 'react';
+import { useState,useEffect } from 'react';
+
+type Claim = {
+  _id: string;
+  amount: number;
+  reason: string;
+  createdAt: string;
+};
 
 export function Payouts() {
   const [activeFilter, setActiveFilter] = useState<'all' | 'paid' | 'pending'>('all');
@@ -17,184 +24,35 @@ export function Payouts() {
     return Math.min(Math.max(calculated, cap.min), cap.max);
   };
 
-  const payouts = [
-    {
-      id: 'PAY-2024-0045',
-      date: 'Mar 17, 2026',
-      time: '9:42 AM',
-      baseAmount: 100,
-      severityMultiplier: 2.0,
-      rarityFactor: 2.8,
-      riskFactor: 1.25,
-      trigger: 'Extreme Rainfall',
-      triggerType: 'rain',
-      value: '78mm/24hrs',
-      severity: 'High',
-      status: 'paid',
-      upiRef: 'UPI408629891',
-      processingTime: '3 mins',
-      cap: { min: 350, max: 700 },
-    },
-    {
-      id: 'PAY-2024-0046',
-      date: 'Mar 18, 2026',
-      time: '11:25 AM',
-      baseAmount: 80,
-      severityMultiplier: 1.6,
-      rarityFactor: 1.7,
-      riskFactor: 1.15,
-      trigger: 'Heavy Rainfall',
-      triggerType: 'rain',
-      value: '48mm/24hrs',
-      severity: 'Medium',
-      status: 'pending',
-      upiRef: '-',
-      processingTime: 'Processing',
-      cap: { min: 150, max: 350 },
-    },
-    {
-      id: 'PAY-2024-0044',
-      date: 'Mar 16, 2026',
-      time: '3:15 PM',
-      baseAmount: 80,
-      severityMultiplier: 2.2,
-      rarityFactor: 2.5,
-      riskFactor: 1.3,
-      trigger: 'Hazardous Air Quality',
-      triggerType: 'pollution',
-      value: 'AQI 412',
-      severity: 'High',
-      status: 'paid',
-      upiRef: 'UPI408629234',
-      processingTime: '4 mins',
-      cap: { min: 350, max: 700 },
-    },
-    {
-      id: 'PAY-2024-0042',
-      date: 'Mar 15, 2026',
-      time: '2:34 PM',
-      baseAmount: 80,
-      severityMultiplier: 1.8,
-      rarityFactor: 1.5,
-      riskFactor: 1.15,
-      trigger: 'Heavy Rainfall',
-      triggerType: 'rain',
-      value: '52mm/24hrs',
-      severity: 'Medium',
-      status: 'paid',
-      upiRef: 'UPI408529617',
-      processingTime: '4 mins',
-      cap: { min: 150, max: 350 },
-    },
-    {
-      id: 'PAY-2024-0038',
-      date: 'Mar 10, 2026',
-      time: '11:18 AM',
-      baseAmount: 80,
-      severityMultiplier: 1.6,
-      rarityFactor: 1.8,
-      riskFactor: 1.2,
-      trigger: 'Severe Pollution',
-      triggerType: 'pollution',
-      value: 'AQI 315',
-      severity: 'Medium',
-      status: 'paid',
-      upiRef: 'UPI408429105',
-      processingTime: '5 mins',
-      cap: { min: 150, max: 350 },
-    },
-    {
-      id: 'PAY-2024-0035',
-      date: 'Mar 07, 2026',
-      time: '1:22 PM',
-      baseAmount: 60,
-      severityMultiplier: 1.2,
-      rarityFactor: 0.9,
-      riskFactor: 1.0,
-      trigger: 'Moderate Rain',
-      triggerType: 'drizzle',
-      value: '42mm/24hrs',
-      severity: 'Low',
-      status: 'paid',
-      upiRef: 'UPI408328956',
-      processingTime: '3 mins',
-      cap: { min: 50, max: 150 },
-    },
-    {
-      id: 'PAY-2024-0031',
-      date: 'Mar 03, 2026',
-      time: '4:52 PM',
-      baseAmount: 80,
-      severityMultiplier: 1.5,
-      rarityFactor: 1.4,
-      riskFactor: 1.1,
-      trigger: 'Heavy Rainfall',
-      triggerType: 'rain',
-      value: '45mm/24hrs',
-      severity: 'Medium',
-      status: 'paid',
-      upiRef: 'UPI408328741',
-      processingTime: '4 mins',
-      cap: { min: 150, max: 350 },
-    },
-    {
-      id: 'PAY-2024-0027',
-      date: 'Feb 24, 2026',
-      time: '9:15 AM',
-      baseAmount: 70,
-      severityMultiplier: 1.7,
-      rarityFactor: 1.6,
-      riskFactor: 1.15,
-      trigger: 'Extreme Heat',
-      triggerType: 'heat',
-      value: '41°C',
-      severity: 'Medium',
-      status: 'paid',
-      upiRef: 'UPI408227892',
-      processingTime: '6 mins',
-      cap: { min: 150, max: 350 },
-    },
-    {
-      id: 'PAY-2024-0024',
-      date: 'Feb 18, 2026',
-      time: '7:45 PM',
-      baseAmount: 90,
-      severityMultiplier: 2.1,
-      rarityFactor: 2.2,
-      riskFactor: 1.2,
-      trigger: 'Severe Storm',
-      triggerType: 'storm',
-      value: 'Wind 65km/h',
-      severity: 'High',
-      status: 'paid',
-      upiRef: 'UPI408127453',
-      processingTime: '4 mins',
-      cap: { min: 350, max: 700 },
-    },
-    {
-      id: 'PAY-2024-0047',
-      date: 'Mar 18, 2026',
-      time: '2:10 PM',
-      baseAmount: 70,
-      severityMultiplier: 1.4,
-      rarityFactor: 1.3,
-      riskFactor: 1.1,
-      trigger: 'Moderate Pollution',
-      triggerType: 'pollution',
-      value: 'AQI 285',
-      severity: 'Low',
-      status: 'pending',
-      upiRef: '-',
-      processingTime: 'Processing',
-      cap: { min: 50, max: 150 },
-    },
-  ];
+  const [payouts, setPayouts] = useState<Claim[]>([]);
+const user = JSON.parse(localStorage.getItem("gigshield_user") || "null");
+
+useEffect(() => {
+  fetch(`http://localhost:5000/api/claims/${user._id}`)
+    .then(res => res.json())
+    .then(data => setPayouts(data))
+    .catch(err => console.error(err));
+}, []);
 
   // Calculate actual payouts with AI logic
-  const payoutsWithCalculations = payouts.map(p => ({
-    ...p,
-    amount: calculatePayout(p.baseAmount, p.severityMultiplier, p.rarityFactor, p.riskFactor, p.cap),
-  }));
+ const payoutsWithCalculations = payouts.map((p) => ({
+  id: p._id,
+  date: new Date(p.createdAt).toDateString(),
+  time: new Date(p.createdAt).toLocaleTimeString(),
+  trigger: p.reason,
+  triggerType: p.reason === "Heavy Rain" ? "rain" : "pollution",
+  value: p.reason === "Heavy Rain" ? "40mm+" : "AQI 300+",
+  severity: "High",
+  status: "paid",
+  upiRef: "AUTO",
+  processingTime: "5 mins",
+  baseAmount: p.amount,
+  severityMultiplier: 1,
+  rarityFactor: 1,
+  riskFactor: 1,
+  cap: { min: p.amount, max: p.amount },
+  amount: p.amount
+}));
 
   // Filter payouts based on active filter
   const filteredPayouts = payoutsWithCalculations.filter(p => {
