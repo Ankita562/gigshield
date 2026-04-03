@@ -94,6 +94,14 @@ Every morning the dashboard shows a 7-day risk forecast:
 
 This makes GigShield a daily earning assistant, not just a safety net.
 
+### ❌ Coverage Exclusions
+- Vehicle damage or repairs
+- Personal health or accidents
+- Acts of war or civil unrest
+- Government-declared pandemics
+- Self-induced inactivity (worker logged out before trigger)
+- Events outside registered zone
+- First 24 hours of a new policy (cooling-off period)
 ---
 
 ## 6. Weekly Premium Model & AI
@@ -112,6 +120,13 @@ Priority claim processing under 3 minutes. Premium lock guaranteed for 6 weeks.
 
 Dynamic pricing adjusts the base of each tier every Sunday.
 Week-over-week changes capped at ±10% to prevent sudden shocks.
+
+### Pool Viability
+500 active workers × ₹36 avg premium = ₹18,000/week collected.
+Expected claims: ~12 events × ₹200 avg = ₹2,340/week paid out.
+Loss ratio: 13.1% — well within the industry safe zone of <60%.
+Pool is sustainable at current premium levels.
+
 ---
 
 ## 7. Parametric Triggers
