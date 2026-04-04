@@ -128,9 +128,9 @@ Scikit-learn Gradient Boosting model based on zone risk and forecast data.
 
 | Plan | Price | Triggers | Max Payout/Event |
 |---|---|---|---|
-| Basic Shield | ₹30/week | Rain >40mm, AQI >300 | ₹100 |
-| Standard Shield | ₹45/week | Rain >40mm, AQI >300, Heat ≥40°C, Wind >55km/h | ₹300 |
-| Premium Shield | ₹70/week | Rain >35mm, AQI >250, Heat ≥38°C, Wind >45km/h | ₹500 |
+| Basic Shield | ₹30/week | Rain >40mm, AQI >300 | ₹400 |
+| Standard Shield | ₹45/week | Rain >40mm, AQI >300, Heat ≥40°C, Wind >55km/h | ₹600 |
+| Premium Shield | ₹70/week | Rain >35mm, AQI >250, Heat ≥38°C, Wind >45km/h | ₹1,000 |
 
 Premium Shield has lower thresholds — it triggers earlier and pays more.
 Priority claim processing under 3 minutes. Premium lock guaranteed for 6 weeks.
@@ -140,8 +140,8 @@ Week-over-week changes capped at ±10% to prevent sudden shocks.
 
 ### Pool Viability
 500 active workers × ₹36 avg premium = ₹18,000/week collected.
-Expected claims: ~12 events × ₹200 avg = ₹2,340/week paid out.
-Loss ratio: 13.1% — well within the industry safe zone of <60%.
+Expected claims: ~12 events × ₹250 avg = ₹3,000/week paid out.
+Loss ratio: 16.7% — well within the industry safe zone of <60%.
 Pool is sustainable at current premium levels.
 
 ### Handling Catastrophic (CAT) & Systemic Risk
@@ -332,6 +332,9 @@ flowchart LR
 | APIs | OpenWeatherMap, AQICN, Nager.Date, Razorpay Test Mode |
 | KYC | Tesseract.js (OCR) + Liveness Check |
 | Deploy | Vercel (frontend), Render (backend) |
+| Weather (Primary) | Weather Union API (Zomato) | 750+ ground stations, 1-min refresh |
+| Weather (Backup) | IMD via indianapi.in | Government-certified, IRDAI audit credible |
+| Weather (Fallback) | Open-Meteo | Free, no key, 1km resolution |
 
 Microservices architecture — AI service runs independently so ML models can be updated without touching the main backend.
 
@@ -396,7 +399,11 @@ AI Service (Python Flask)  :5001  ← risk scoring, premium calculation
       ↓
 MongoDB Atlas                     ← users, policies, claims, audit logs
 ```
- 
+
+### Accessing the Inspector Dashboard
+Once all three services are running, open `http://localhost:5173/admin` in your browser to access the GigKavach Admin & IRDAI Inspector Dashboard.
+
+
 > Set `DEMO_MODE=true` in `.env` when live weather station APIs are
 > temporarily unavailable. All three services must run simultaneously
 > for the full parametric trigger → fraud check → payout pipeline to work.
@@ -405,11 +412,11 @@ MongoDB Atlas                     ← users, policies, claims, audit logs
 
 ## 12. Development Plan
 
-| Phase | Weeks | Deliverables |
-|---|---|---|
-| Seed | 1–2 | Schema, API setup, wireframes, README, pitch video |
-| Scale | 3–4 | React Native app, Express backend, MongoDB, trigger engine, premium cron, Razorpay |
-| Soar | 5–6 | Fraud model, Inspector dashboard, nudge engine, WhatsApp alerts, 5-min demo video |
+| Phase | Weeks | Status | Key Deliverables |
+|---|---|---|---|
+| Seed | 1–2 | ✅ Complete | README, pitch video, architecture |
+| Scale | 3–4 | ✅ Complete | React Native app, backend, trigger engine, premium model, Razorpay |
+| Soar | 5–6 | 🔄 In Progress | Fraud model, Inspector dashboard, final demo video |
 
 **Demo Day scenario:** Live rain trigger fires for Bengaluru PIN 560034 → GPS validated → cross-signal corroboration passes → fraud check clean → UPI payout in under 5 minutes → Inspector dashboard shows full audit trail.
 
