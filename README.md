@@ -1,6 +1,6 @@
 # GigKavach 🛡️
 **AI-Powered Parametric Income Protection for India's Food Delivery Partners**
-Guidewire DEVTrails 2026 — Phase 1 Submission
+Guidewire DEVTrails 2026 — Phase 2 Submission
 
 **Team:** VisionCoders | BMS College of Engineering
 
@@ -111,9 +111,9 @@ Scikit-learn Gradient Boosting model based on zone risk and forecast data.
 
 | Plan | Price | Triggers | Max Payout/Event |
 |---|---|---|---|
-| Basic Shield | ₹30/week | Rain >40mm, AQI >300 | ₹400 |
-| Standard Shield | ₹45/week | Rain >40mm, AQI >300, Heat ≥40°C, Wind >55km/h | ₹600 |
-| Premium Shield | ₹70/week | Rain >35mm, AQI >250, Heat ≥38°C, Wind >45km/h | ₹1,000 |
+| Basic Shield | ₹30/week | Rain >40mm, AQI >300 | ₹100 |
+| Standard Shield | ₹45/week | Rain >40mm, AQI >300, Heat ≥40°C, Wind >55km/h | ₹300 |
+| Premium Shield | ₹70/week | Rain >35mm, AQI >250, Heat ≥38°C, Wind >45km/h | ₹500 |
 
 Premium Shield has lower thresholds — it triggers earlier and pays more.
 Priority claim processing under 3 minutes. Premium lock guaranteed for 6 weeks.
@@ -306,7 +306,71 @@ Microservices architecture — AI service runs independently so ML models can be
 
 ---
 
-## 11. Development Plan
+## 11. Local Setup & Installation
+ 
+**Prerequisites:** Node.js v18+, Python 3.9+, Git, MongoDB
+ 
+### Step 1 — Clone the Repository
+```bash
+git clone https://github.com/Ankita562/gigkavach.git
+cd gigkavach
+```
+ 
+### Step 2 — Environment Variables
+Create `.env` inside `backend/`:
+```
+MONGO_URI=your_mongodb_connection_string
+PORT=5000
+ZOMATO_KEY=your_weather_union_key
+AQICN_API_KEY=your_aqicn_key
+IMD_API_KEY=your_imd_key
+DEMO_MODE=true
+```
+ 
+### Step 3 — Run Python Risk Engine (Port 5001)
+```bash
+cd backend
+pip install flask flask-cors scikit-learn pandas numpy joblib
+python risk_model.py
+```
+✅ Expected: `Running on http://127.0.0.1:5001`
+ 
+### Step 4 — Run Node.js Backend (Port 5000)
+Open a new terminal:
+```bash
+cd backend
+npm install
+node server.js
+```
+✅ Expected: `MongoDB Connected` and `Server running on port 5000`
+ 
+### Step 5 — Run Frontend (Port 5173)
+Open a third terminal:
+```bash
+cd frontend
+npm install
+npm run dev
+```
+✅ App running at `http://localhost:5173`
+ 
+### Architecture
+```
+Frontend  (React Native)   :5173
+      ↓
+Backend   (Node.js)        :5000  ← trigger engine, claims, policies, fraud
+      ↓
+AI Service (Python Flask)  :5001  ← risk scoring, premium calculation
+      ↓
+MongoDB Atlas                     ← users, policies, claims, audit logs
+```
+ 
+> Set `DEMO_MODE=true` in `.env` when live weather station APIs are
+> temporarily unavailable. All three services must run simultaneously
+> for the full parametric trigger → fraud check → payout pipeline to work.
+
+---
+
+## 12. Development Plan
 
 | Phase | Weeks | Deliverables |
 |---|---|---|
@@ -318,7 +382,7 @@ Microservices architecture — AI service runs independently so ML models can be
 
 ---
 
-## 12. Team
+## 13. Team
 
 | Name | Role |
 |---|---|
@@ -331,4 +395,4 @@ Microservices architecture — AI service runs independently so ML models can be
 ---
 
 *GigKavach — Parametric income protection for Bharat's invisible workforce.*
-*Deadline: March 20, 11:59 PM*
+*Guidewire DEVTrails 2026 — Phase 2 Submission*
