@@ -140,7 +140,7 @@ try {
             </div>
             <h2 className="text-2xl font-bold text-[#0b2545] mb-2">Registration Successful!</h2>
             <p className="text-[#13315c] mb-4">
-              Your GigShield account has been created successfully.
+              Your GigKavach account has been created successfully.
             </p>
             <div className="bg-[#eef4ed] rounded-xl p-4 border border-[#8da9c4]/40">
               <p className="text-sm text-[#13315c]/70 mb-1">Your Policy UIN</p>
@@ -156,8 +156,7 @@ try {
   }
 
   return (
-    <MobileLayout>
-      {/* Header */}
+  <div className="min-h-screen max-w-md mx-auto relative shadow-2xl bg-white overflow-y-auto pb-10 border-x border-gray-200">
       <div className="relative bg-gradient-to-br from-[#134074] via-[#13315c] to-[#0b2545] text-white px-6 pt-12 pb-20 overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-0 right-0 w-96 h-96 bg-[#8da9c4] rounded-full blur-3xl"></div>
@@ -170,7 +169,7 @@ try {
               <Shield className="w-8 h-8 text-white" strokeWidth={2.5} />
             </div>
             <div>
-              <h1 className="text-3xl font-bold tracking-tight">GigShield</h1>
+              <h1 className="text-3xl font-bold tracking-tight">GigKavach</h1>
               <p className="text-[#8da9c4] text-xs">Income Protection for Gig Workers</p>
             </div>
           </div>
@@ -369,7 +368,7 @@ try {
               ) : (
                 <>
                   <Shield className="w-6 h-6" strokeWidth={2.5} />
-                  Create GigShield Account
+                  Create GigKavach Account
                   <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" strokeWidth={2.5} />
                 </>
               )}
@@ -394,7 +393,7 @@ try {
       {/* Benefits */}
       <div className="px-6 mb-6">
         <div className="bg-gradient-to-br from-[#134074]/10 to-[#8da9c4]/20 rounded-2xl p-5 border border-[#8da9c4]/50">
-          <p className="font-bold text-[#0b2545] mb-4 text-base">✨ What You Get with GigShield</p>
+          <p className="font-bold text-[#0b2545] mb-4 text-base">✨ What You Get with GigKavach</p>
           <div className="space-y-3">
             <div className="flex items-start gap-3">
               <div className="w-6 h-6 bg-[#134074] rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -465,6 +464,6 @@ try {
           <span className="text-[#134074] font-bold underline">Insurance Terms</span>
         </p>
       </div>
-    </MobileLayout>
+    </div>
   );
 }

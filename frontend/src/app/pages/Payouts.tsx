@@ -320,7 +320,7 @@ return()=>clearInterval(interval);
             <div>
               <p className="font-bold text-[#0b2545] mb-2 text-base">Auto-Payout System</p>
               <p className="text-sm text-[#13315c] leading-relaxed mb-3">
-                GigShield monitors weather & AQI 24/7. When thresholds are breached in your area, you get auto-paid to your UPI instantly.
+                GigKavach monitors weather & AQI 24/7. When thresholds are breached in your area, you get auto-paid to your UPI instantly.
               </p>
               <div className="space-y-2">
                 <div className="flex items-center gap-2 text-xs">

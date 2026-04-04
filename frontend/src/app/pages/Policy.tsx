@@ -4,7 +4,7 @@ import { Shield, FileText, CheckCircle, AlertCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { API_BASE } from '../../config';
 
-export function Policy(): JSX.Element {
+export function Policy() {
   const [policyData, setPolicyData] = useState<any | null>(null);
 
   const user = JSON.parse(localStorage.getItem('gigshield_user') || 'null');

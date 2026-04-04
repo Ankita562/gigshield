@@ -59,7 +59,7 @@ export function Home() {
             <div className="w-10 h-10 bg-white/15 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/20">
               <Shield className="w-6 h-6 text-white" strokeWidth={2.5} />
             </div>
-            <h1 className="text-3xl font-bold tracking-tight">GigShield</h1>
+            <h1 className="text-3xl font-bold tracking-tight">GigKavach</h1>
           </div>
           <p className="text-[#8da9c4] text-sm flex items-center gap-2 ml-1">
             <span className="w-2 h-2 bg-emerald-400 rounded-full"></span>

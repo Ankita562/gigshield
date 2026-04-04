@@ -1,10 +1,21 @@
 import React, { useState } from 'react';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 
 function AdminDashboard() {
   const [engineStatus, setEngineStatus] = useState('Standby... Awaiting manual trigger.');
   const [payoutTriggered, setPayoutTriggered] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [auditTime, setAuditTime] = useState('');
+
+  // Dynamic Chart Data - Notice how Tuesday updates when payout triggers!
+  const weeklyData = [
+    { name: 'Wed', claims: 4 },
+    { name: 'Thu', claims: 8 },
+    { name: 'Fri', claims: 3 },
+    { name: 'Sat', claims: 42 }, // Storm day spike
+    { name: 'Sun', claims: 6 },
+    { name: 'Mon', claims: 14 },
+    { name: 'Tue', claims: payoutTriggered ? 24 : 12 },
+  ];
 
   const runActuarialCheck = async () => {
     setIsLoading(true);
@@ -16,7 +27,6 @@ function AdminDashboard() {
       const data = await response.json();
       
       const timeNow = new Date().toLocaleTimeString();
-      setAuditTime(timeNow);
 
       if (data.payout === true) {
         setEngineStatus(`🚨 MAJORITY CONSENSUS SUCCESS: 2/3 Nodes confirmed heavy rain.
@@ -41,7 +51,7 @@ function AdminDashboard() {
       {/* Header */}
       <header className="mb-8 border-b pb-4 flex justify-between items-end">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">🛡️ GigShield Admin & IRDAI Inspector</h1>
+          <h1 className="text-3xl font-bold text-gray-900">🛡️ GigKavach Admin & IRDAI Inspector</h1>
           <p className="text-gray-500">Live system monitoring and compliance dashboard.</p>
         </div>
         <button 
@@ -56,7 +66,7 @@ function AdminDashboard() {
       {/* Main Grid Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
 
-        {/* SECTION 1: Actuarial Pool Health */}
+        {/* SECTION 1: Actuarial Pool Health + Graph */}
         <div className="bg-white p-6 rounded-lg shadow border border-gray-200">
           <h2 className="text-xl font-bold text-blue-700 mb-4">📊 Actuarial Pool Health</h2>
           <div className="space-y-4">
@@ -73,10 +83,8 @@ function AdminDashboard() {
                 <span className="text-gray-600">Max Actuarial Exposure</span>
                 <span className="font-bold text-red-600">₹75,000</span>
               </div>
-              <p className="text-xs text-gray-500 mt-1">Pool Coverage Ratio: <span className="font-bold text-gray-700">23.7%</span> (Collected pool covers 23.7% of max exposure)</p>
             </div>
             
-            {/* The Loss Ratio Visual */}
             <div className="pt-2 relative group">
               <div className="flex justify-between mb-1">
                 <span className="text-gray-600 font-semibold">Current Loss Ratio</span>
@@ -86,24 +94,39 @@ function AdminDashboard() {
                 <div className="bg-blue-600 h-2.5 rounded-full" style={{ width: payoutTriggered ? '13.1%' : '12.0%' }}></div>
               </div>
               <p className="text-xs font-bold text-green-600">[HEALTHY] Industry safe zone: &lt;60%</p>
-              
-              {/* Hover Tooltip */}
-              <div className="absolute left-0 bottom-full mb-2 hidden group-hover:block w-full bg-gray-800 text-white text-xs rounded p-2 shadow-lg z-10">
-                13.1% loss ratio — Industry benchmark for micro-insurance is &lt;60%. GigShield is operating at 78% below the risk threshold. Pool is sustainable at current premium levels.
+            </div>
+
+            {/* LIVE RECHARTS GRAPH */}
+            <div className="pt-4 mt-2 border-t border-gray-100">
+              <p className="text-sm font-semibold text-gray-600 mb-2">Claim Frequency (Last 7 Days)</p>
+              <div className="h-40 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={weeklyData} margin={{ top: 10, right: 0, left: -25, bottom: 0 }}>
+                    <XAxis dataKey="name" tick={{fontSize: 12}} axisLine={false} tickLine={false} />
+                    <YAxis tick={{fontSize: 12}} axisLine={false} tickLine={false} />
+                    <Tooltip 
+                      cursor={{fill: '#f3f4f6'}}
+                      contentStyle={{borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)'}}
+                    />
+                    <ReferenceLine y={25} stroke="#ef4444" strokeDasharray="3 3" />
+                    <Bar dataKey="claims" fill={payoutTriggered ? "#ef4444" : "#3b82f6"} radius={[4, 4, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
               </div>
             </div>
+
           </div>
         </div>
 
-        {/* SECTION 2: Live Engine Feed (Wider Column) */}
+        {/* SECTION 2: Live Engine Feed */}
         <div className="bg-white p-6 rounded-lg shadow border border-gray-200 lg:col-span-2 flex flex-col">
           <h2 className="text-xl font-bold text-gray-800 mb-4">📡 Live Engine Feed & Audit Trail</h2>
-          <div className="bg-gray-900 p-4 rounded font-mono text-sm flex-grow flex flex-col justify-end border border-gray-700">
+          <div className="bg-gray-900 p-4 rounded font-mono text-sm flex-grow flex flex-col justify-start border border-gray-700">
             <p className="text-gray-500 mb-2">// Zomato Weather Union (ZWL004645) ... [Active]</p>
             <p className="text-gray-500 mb-2">// IMD IRDAI Node (IMD-BLR) ... [Active]</p>
             <p className="text-gray-500 mb-4">// Open-Meteo Satellite (12.93, 77.62) ... [Active]</p>
             <pre className={`whitespace-pre-wrap ${payoutTriggered ? "text-red-400 font-bold" : "text-green-400"}`}>
-              {engineStatus}
+               {engineStatus}
             </pre>
           </div>
         </div>
@@ -111,8 +134,6 @@ function AdminDashboard() {
 
       {/* Bottom Row: 3 Info Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        
-        {/* Card 3: Claims This Week */}
         <div className="bg-white p-6 rounded-lg shadow border border-gray-200">
           <h2 className="text-lg font-bold text-gray-800 mb-4">📋 Claims This Week</h2>
           <ul className="space-y-2 text-sm">
@@ -123,7 +144,6 @@ function AdminDashboard() {
           </ul>
         </div>
 
-        {/* Card 4: IRDAI Compliance */}
         <div className="bg-white p-6 rounded-lg shadow border border-gray-200">
           <h2 className="text-lg font-bold text-gray-800 mb-4">🏛️ IRDAI Compliance</h2>
           <ul className="space-y-2 text-sm text-gray-700">
@@ -134,7 +154,6 @@ function AdminDashboard() {
           </ul>
         </div>
 
-        {/* Card 5: Zone Risk Heat */}
         <div className="bg-white p-6 rounded-lg shadow border border-gray-200">
           <h2 className="text-lg font-bold text-gray-800 mb-4">📍 Zone Risk Heat</h2>
           <table className="w-full text-sm text-left">
@@ -164,7 +183,6 @@ function AdminDashboard() {
             </tbody>
           </table>
         </div>
-
       </div>
     </div>
   );

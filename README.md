@@ -1,4 +1,4 @@
-# GigShield 🛡️
+# GigKavach 🛡️
 **AI-Powered Parametric Income Protection for India's Food Delivery Partners**
 Guidewire DEVTrails 2026 — Phase 1 Submission
 
@@ -22,12 +22,12 @@ Food delivery partners (Zomato & Swiggy) earn ₹700–₹1,200/day entirely fro
 
 ---
 
-## 3. How GigShield Works — System Overview
+## 3. How GigKavach Works — System Overview
 
 ```mermaid
 flowchart TD
     A([🛵 Delivery Partner]) -->|Registers + pays ₹30/week| B[Policy Issued\nUnique UIN generated]
-    B --> C[GigShield monitors\nyour PIN code 24/7]
+    B --> C[GigKavach monitors\nyour PIN code 24/7]
 
     C --> D1[🌧️ OpenWeatherMap\nRain / Heat]
     C --> D2[💨 AQICN API\nPollution AQI]
@@ -60,7 +60,7 @@ flowchart TD
 ```mermaid
 sequenceDiagram
     participant W as 🛵 Worker
-    participant S as GigShield System
+    participant S as GigKavach System
     participant API as External APIs
     participant AI as AI Service
     participant UPI as Razorpay UPI
@@ -86,13 +86,13 @@ sequenceDiagram
 ## 5. Core Scenarios
 
 **Scenario A — Zero-Touch Payout**
-GigShield polls APIs every 15–60 minutes. When rainfall exceeds 40mm/24hrs or AQI crosses 300 in the worker's PIN code, a Loss Event is declared automatically. GPS zone validated, fraud check run, UPI credited in under 5 minutes. No form. No approval needed.
+GigKavach polls APIs every 15–60 minutes. When rainfall exceeds 40mm/24hrs or AQI crosses 300 in the worker's PIN code, a Loss Event is declared automatically. GPS zone validated, fraud check run, UPI credited in under 5 minutes. No form. No approval needed.
 
 **Scenario B — Predictive Earnings Nudge**
 Every morning the dashboard shows a 7-day risk forecast:
 > *"⚠️ Heavy rain expected Thursday. Work extra today — Thursday income is protected under your ₹36 premium."*
 
-This makes GigShield a daily earning assistant, not just a safety net.
+This makes GigKavach a daily earning assistant, not just a safety net.
 
 ### ❌ Coverage Exclusions
 - Vehicle damage or repairs
@@ -106,7 +106,7 @@ This makes GigShield a daily earning assistant, not just a safety net.
 
 ## 6. Weekly Premium Model & AI
 
-GigShield offers three coverage tiers, priced dynamically every Sunday by our 
+GigKavach offers three coverage tiers, priced dynamically every Sunday by our 
 Scikit-learn Gradient Boosting model based on zone risk and forecast data.
 
 | Plan | Price | Triggers | Max Payout/Event |
@@ -146,7 +146,7 @@ Every trigger requires **two independent sources** to confirm before a payout fi
 ## 🚨 8. Adversarial Defense & Anti-Spoofing Strategy
 ### Market Crash Response — Coordinated GPS Fraud Ring
 
-> *500 delivery partners are faking GPS locations. A coordinated fraud ring is draining the insurance pool. Simple GPS verification is dead. Here is how GigShield catches the fakers without punishing honest workers.*
+> *500 delivery partners are faking GPS locations. A coordinated fraud ring is draining the insurance pool. Simple GPS verification is dead. Here is how GigKavach catches the fakers without punishing honest workers.*
 
 ### The Problem: Why Simple GPS Fails
 
@@ -156,7 +156,7 @@ A single GPS coordinate check is trivially defeated. Fake apps, VPNs, and mocked
 
 ### Layer 1 — Device Fingerprinting at Onboarding
 
-When a worker registers, GigShield captures a unique device fingerprint:
+When a worker registers, GigKavach captures a unique device fingerprint:
 - Device ID + hardware hash
 - SIM card identifier
 - React Native's `expo-device` unique ID
@@ -169,7 +169,7 @@ When a worker registers, GigShield captures a unique device fingerprint:
 
 A real delivery partner moves like a human. A fraud bot does not.
 
-Every 15 minutes while a policy is active, GigShield logs the worker's GPS coordinates. Before any payout fires, the AI checks the movement history:
+Every 15 minutes while a policy is active, GigKavach logs the worker's GPS coordinates. Before any payout fires, the AI checks the movement history:
 
 ```
 Speed between two GPS points = Distance / Time elapsed
@@ -185,7 +185,7 @@ Real workers accelerate, decelerate, stop at restaurants, and move in delivery-s
 
 ### Layer 3 — Cross-Signal Corroboration (The Key Innovation)
 
-This is what separates GigShield from basic GPS checks.
+This is what separates GigKavach from basic GPS checks.
 
 When a payout is triggered, we do not just check **where the worker says they are**. We check whether **multiple independent signals agree**:
 
@@ -208,7 +208,7 @@ A genuine worker in Koramangala during a flood will pass all six checks naturall
 
 Individual claim checks catch individual fraudsters. Pool monitoring catches **coordinated rings**.
 
-Every hour, GigShield's admin dashboard computes:
+Every hour, GigKavach's admin dashboard computes:
 
 ```
 Zone Claim Rate = Claims filed in zone / Active policies in zone
@@ -227,7 +227,7 @@ This catches the fraud ring as a group, not just individual bad actors.
 
 ### How We Protect Honest Workers
 
-The biggest risk in fraud defense is punishing innocent people. GigShield's approach minimises this:
+The biggest risk in fraud defense is punishing innocent people. GigKavach's approach minimises this:
 
 - **Freeze, don't deny.** A flagged claim is held for human review, not automatically rejected. An honest worker whose GPS had a glitch gets their payout after a 2-hour review, not a permanent denial.
 - **Explainable flags.** Every hold generates a human-readable reason. The admin sees exactly why a claim was flagged — not just a score.
@@ -259,11 +259,11 @@ flowchart TD
 
 ## 9. IRDAI Compliance 
 
-> *"Most insurance products are built for two users — the customer and the insurer. GigShield adds a third: the IRDAI Inspector. Every payout, policy, and grievance is audit-ready from day one."*
+> *"Most insurance products are built for two users — the customer and the insurer. GigKavach adds a third: the IRDAI Inspector. Every payout, policy, and grievance is audit-ready from day one."*
 
 ```mermaid
 flowchart LR
-    A[🛵 Worker\nDashboard] --> D[GigShield\nPlatform]
+    A[🛵 Worker\nDashboard] --> D[GigKavach\nPlatform]
     B[🏢 Admin\nDashboard] --> D
     C[👮 IRDAI Inspector\nDashboard] --> D
 
@@ -330,5 +330,5 @@ Microservices architecture — AI service runs independently so ML models can be
 
 ---
 
-*GigShield — Parametric income protection for Bharat's invisible workforce.*
+*GigKavach — Parametric income protection for Bharat's invisible workforce.*
 *Deadline: March 20, 11:59 PM*

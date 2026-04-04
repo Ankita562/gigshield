@@ -97,7 +97,7 @@ export function Auth() {
             </div>
             <h2 className="text-2xl font-bold text-[#0b2545] mb-2">Creating Your Account</h2>
             <p className="text-[#13315c]">
-              Setting up your GigShield protection...
+              Setting up your GigKavach protection...
             </p>
           </div>
         </div>
@@ -120,7 +120,7 @@ export function Auth() {
               <Shield className="w-7 h-7 text-white" strokeWidth={2.5} />
             </div>
             <div>
-              <h1 className="text-3xl font-bold tracking-tight">GigShield</h1>
+              <h1 className="text-3xl font-bold tracking-tight">GigKavach:The Guardian for The Gig Economy</h1>
               <p className="text-[#8da9c4] text-xs">Income Protection for Gig Workers</p>
             </div>
           </div>
@@ -313,7 +313,7 @@ export function Auth() {
               className="w-full bg-gradient-to-r from-[#134074] to-[#0b2545] text-white py-4 rounded-xl font-bold text-lg hover:shadow-2xl transition-all flex items-center justify-center gap-3 group mt-6"
             >
               <Shield className="w-6 h-6" strokeWidth={2.5} />
-              {isLogin ? 'Login to GigShield' : 'Continue to Plans'}
+              {isLogin ? 'Login to GigKavach' : 'Continue to Plans'}
               <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" strokeWidth={2.5} />
             </button>
           </form>
@@ -339,7 +339,7 @@ export function Auth() {
       {!isLogin && (
         <div className="px-6 mb-6">
           <div className="bg-[#8da9c4]/20 rounded-2xl p-5 border border-[#8da9c4]/50">
-            <p className="font-bold text-[#0b2545] mb-3 text-base">Why 50,000+ delivery partners trust GigShield</p>
+            <p className="font-bold text-[#0b2545] mb-3 text-base">Why 50,000+ delivery partners trust GigKavach</p>
             <div className="space-y-2.5">
               <div className="flex items-start gap-3">
                 <div className="w-5 h-5 bg-[#134074] rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
