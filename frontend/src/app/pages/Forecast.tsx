@@ -20,7 +20,7 @@ useEffect(() => {
         <p className="text-[#eef4ed]/80 text-sm">Bengaluru, PIN 560034</p>
       </div>
 
-      <div className="px-6 -mt-4 mb-6">
+      <div className="px-6 -mt-4">
         <div className="bg-[#dfe6ea] border border-[#c7d3db] rounded-xl p-4 text-white shadow-lg">
           <div className="flex items-center gap-2 mb-1">
             <AlertCircle className="w-5 h-5" />

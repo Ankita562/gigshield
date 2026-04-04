@@ -77,12 +77,24 @@ export function PremiumSelection() {
     },
   };
 
-  const handlePurchase = () => {
+  const handlePurchase = async() => {
+    const user=JSON.parse(localStorage.getItem("gigshield_user")||"null");
+
+    await fetch("http://localhost:5000/api/policy/buy",{
+      method:"Post",
+      headers:{
+        "Content-Type":"application/json"
+      },
+      body:JSON.stringify({
+        userId:user._id,
+        premium:plans[selectedPlan].price
+      })
+    });
     setShowConfirmation(true);
     // Simulate purchase process
     setTimeout(() => {
-      navigate('/policy');
-    }, 2500);
+      navigate('/');
+    }, 2000);
   };
 
   if (showConfirmation) {

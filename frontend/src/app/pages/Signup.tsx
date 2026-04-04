@@ -85,13 +85,25 @@ const response = await fetch(`${API_BASE}/api/register`, {
         body: JSON.stringify(formData),
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Registration failed');
-      }
+      // if (!response.ok) {
+      //   const errorData = await response.json();
+      //   throw new Error(errorData.message || 'Registration failed');
+      // }
 
-      const data = await response.json();
-      
+      // const data = await response.json();
+      const text = await response.text();
+console.log("RAW RESPONSE:", text);
+
+
+let data;
+try {
+  data = JSON.parse(text);
+} catch {
+  throw new Error("Server returned invalid JSON");
+}
+      if (!data.user) {
+  throw new Error(data.message || "Registration failed");
+}
       // Store user data and policy in localStorage
       localStorage.setItem('gigshield_user', JSON.stringify(data.user));
       localStorage.setItem('gigshield_policy', JSON.stringify(data.policy));
