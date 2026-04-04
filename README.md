@@ -127,6 +127,20 @@ Expected claims: ~12 events × ₹200 avg = ₹2,340/week paid out.
 Loss ratio: 13.1% — well within the industry safe zone of <60%.
 Pool is sustainable at current premium levels.
 
+### Handling Catastrophic (CAT) & Systemic Risk
+
+Weather creates **correlated risk** — when one worker claims, all workers
+in the same zone claim simultaneously. GigKavach prevents pool bankruptcy
+through three layered mechanisms:
+
+| Mechanism | How it works |
+|---|---|
+| **Aggregate limit** | Every policy carries a `payout_cap` calculated by the ML model. A 14-day monsoon pays out on Day 1–3; by Day 4 the cap is reached and the pool stops paying — exactly as the worker's policy promised. |
+| **Claim velocity limit** | Basic Shield: max 2 weather-event payouts per 7-day rolling window. Standard / Premium: max 3. Consecutive event decay applies: Day 1 = 100%, Day 2 = 50%, Day 3 = 0%. |
+| **Stop-loss reinsurance** *(Phase 3)* | GigKavach's micro-risk pools will be backed by a Stop-Loss Treaty with a global reinsurer (Swiss Re / Munich Re model). If total payouts exceed 120% of premiums collected in any 30-day window — as in a 14-day monsoon — the reinsurer covers the excess. Local liquidity pool is never broken. |
+
+**Dynamic seasonal pricing** acts as a fourth buffer: the Gradient Boosting model recognises rising monsoon risk 4–6 weeks ahead and raises base premiums (within the ±10% weekly cap) so the pool enters peak-risk season with a larger cash reserve.
+
 ---
 
 ## 7. Parametric Triggers
