@@ -6,8 +6,25 @@ Guidewire DEVTrails 2026 — Phase 2 Submission
 
 **Pitch Video:** https://youtu.be/j6rNZdCNBcA?si=FwpY-TAH-8BOvIh8
 > 🚨 **Market Crash Response included — Section 8: Adversarial Defense & Anti-Spoofing Strategy**
+
 ---
 
+## Table of Contents
+1. [Persona & Problem](#1-persona--problem)
+2. [Platform](#2-platform)
+3. [How GigKavach Works — System Overview](#3-how-gigkavach-works--system-overview)
+4. [Zero-Touch Claim Workflow](#4-zero-touch-claim-workflow)
+5. [Core Scenarios](#5-core-scenarios)
+6. [Weekly Premium Model & AI](#6-weekly-premium-model--ai)
+7. [Parametric Triggers](#7-parametric-triggers)
+8. [Adversarial Defense & Anti-Spoofing Strategy](#-8-adversarial-defense--anti-spoofing-strategy)
+9. [IRDAI Compliance](#9-irdai-compliance)
+10. [Tech Stack](#10-tech-stack)
+11. [Local Setup & Installation](#11-local-setup--installation)
+12. [Development Plan](#12-development-plan)
+13. [Team](#13-team)
+
+---
 ## 1. Persona & Problem
 
 Food delivery partners (Zomato & Swiggy) earn ₹700–₹1,200/day entirely from active working hours. When heavy rain, extreme heat, severe pollution (AQI > 300), or a Bandh hits — they earn ₹0 with no safety net. No insurance product exists for this.
@@ -334,20 +351,22 @@ cd gigkavach
 Create `.env` inside `backend/`:
 ```
 MONGO_URI=your_mongodb_connection_string
-PORT=5000
 ZOMATO_KEY=your_weather_union_key
-AQICN_API_KEY=your_aqicn_key
 IMD_API_KEY=your_imd_key
 DEMO_MODE=true
+
 ```
  
 ### Step 3 — Run Python Risk Engine (Port 5001)
+Open a terminal and set up an isolated Python environment:
 ```bash
 cd backend
+python -m venv venv
+# Activate the environment (Windows: venv\Scripts\activate | Mac/Linux: source venv/bin/activate)
+source venv/Scripts/activate 
 pip install flask flask-cors scikit-learn pandas numpy joblib
 python risk_model.py
 ```
-✅ Expected: `Running on http://127.0.0.1:5001`
  
 ### Step 4 — Run Node.js Backend (Port 5000)
 Open a new terminal:
