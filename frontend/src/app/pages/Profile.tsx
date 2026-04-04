@@ -72,7 +72,21 @@ export function Profile() {
         </div>
       </div>
 
-      <div className="px-6 mb-10 text-center">
+      {/* GRIEVANCE */}
+      <div className="px-6 mb-6">
+        <div className="bg-[#8da9c4]/20 rounded-xl p-4 border border-[#8da9c4]/50">
+          <h3 className="font-semibold text-[#134074] mb-2">Grievance Redressal</h3>
+          <p className="text-sm text-[#13315c] mb-3">
+            GigKavach follows IRDAI 15-day SLA for all complaints.
+          </p>
+          <button className="text-sm font-semibold text-[#134074]">
+            Raise a Complaint →
+          </button>
+        </div>
+      </div>
+
+      {/* SIGN OUT */}
+      <div className="px-6 mb-6">
         <button
           onClick={handleSignOut}
           className="w-full bg-red-50 text-red-600 py-3 rounded-xl font-semibold border border-red-200 flex items-center justify-center gap-2"
@@ -81,6 +95,13 @@ export function Profile() {
           Sign Out
         </button>
       </div>
+
+      {/* FOOTER */}
+      <div className="px-6 mb-6 text-center text-xs text-[#13315c]/60">
+        <p>GigKavach v1.0.0</p>
+        <p className="mt-1">© 2026 VisionCoders • IRDAI Compliant</p>
+      </div>
+
     </MobileLayout>
   );
 }

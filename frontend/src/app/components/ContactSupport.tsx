@@ -35,7 +35,7 @@ export function ContactSupport() {
             </div>
             <div className="flex-1 text-left">
               <div className="font-semibold text-[#134074]">Email Support</div>
-              <div className="text-sm text-[#13315c]">support@gigshield.in</div>
+              <div className="text-sm text-[#13315c]">support@gigkavach.in</div>
               <div className="text-xs text-[#8da9c4] mt-1">Response within 24 hours</div>
             </div>
           </div>
@@ -76,7 +76,7 @@ export function ContactSupport() {
           <div>
             <div className="font-medium text-[#134074] text-sm">Registered Office</div>
             <div className="text-sm text-[#13315c] mt-1">
-              GigShield Insurance Services Pvt. Ltd.<br />
+              GigKavach Insurance Services Pvt. Ltd.<br />
               123 Business Park, Electronic City<br />
               Bangalore - 560100, India
             </div>

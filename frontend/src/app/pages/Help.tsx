@@ -146,7 +146,7 @@ export function Help() {
       {/* Footer Note - Fixed at bottom */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-[#8da9c4] px-4 py-3 z-10 max-w-md mx-auto">
         <p className="text-xs text-center text-[#8da9c4]">
-          GigShield is regulated by IRDAI | CIN: U66000KA2025PTC123456
+          GigKavach is regulated by IRDAI | CIN: U66000KA2025PTC123456
         </p>
       </div>
     </MobileLayout>

@@ -12,7 +12,7 @@ export function MobileLayout({ children }: MobileLayoutProps) {
     { path: '/', icon: Home, label: 'Home' },
     { path: '/forecast', icon: TrendingUp, label: 'Forecast' },
     { path: '/payouts', icon: Wallet, label: 'Payouts' },
-    {path:"./claims",icon:ClipboardList,label:'Clsims'},
+    {path:"/claims",icon:ClipboardList,label:'Claims'},
     { path: '/policy', icon: FileText, label: 'Policy' },
     { path: '/profile', icon: User, label: 'Profile' }
   ];

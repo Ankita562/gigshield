@@ -100,7 +100,8 @@ useEffect(() => {
   };
 
   return (
-    <MobileLayout>
+    // Replaced <MobileLayout> with a standard mobile-sized container
+    <div className="min-h-screen bg-gray-50 max-w-md mx-auto relative shadow-2xl overflow-hidden">
       {/* Header */}
       <div className="bg-gradient-to-br from-[#134074] via-[#13315c] to-[#0b2545] text-white px-6 pt-12 pb-16">
         <div className="flex items-center gap-3 mb-4">
@@ -108,7 +109,7 @@ useEffect(() => {
             <Shield className="w-8 h-8 text-white" />
           </div>
           <div>
-            <h1 className="text-3xl font-bold">GigShield</h1>
+            <h1 className="text-3xl font-bold">GigKavach</h1>
             <p className="text-[#8da9c4] text-xs">Income Protection</p>
           </div>
         </div>
@@ -178,6 +179,6 @@ useEffect(() => {
           </p>
         </div>
       </div>
-    </MobileLayout>
+    </div>
   );
 }

@@ -230,7 +230,7 @@ export function PremiumSelection() {
               <TrendingUp className="w-6 h-6 text-white" strokeWidth={2.5} />
             </div>
             <div>
-              <p className="font-bold text-[#0b2545] mb-2 text-base">Why Choose GigShield?</p>
+              <p className="font-bold text-[#0b2545] mb-2 text-base">Why Choose GigKavach?</p>
               <div className="space-y-2">
                 <div className="flex items-center gap-2 text-sm">
                   <div className="w-1.5 h-1.5 bg-[#134074] rounded-full"></div>
@@ -261,7 +261,7 @@ export function PremiumSelection() {
           <div>
             <p className="text-sm text-emerald-900 font-semibold mb-1">IRDAI Registered Insurance</p>
             <p className="text-xs text-emerald-800 leading-relaxed">
-              GigShield is a parametric insurance product approved by the Insurance Regulatory and Development Authority of India. Your policy is legally protected.
+              GigKavach is a parametric insurance product approved by the Insurance Regulatory and Development Authority of India. Your policy is legally protected.
             </p>
           </div>
         </div>

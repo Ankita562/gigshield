@@ -22,14 +22,14 @@ interface HelpChatbotProps {
 const IRDAI_FAQS: FAQ[] = [
   {
     id: '1',
-    question: 'What is covered under GigShield policy?',
-    answer: 'GigShield provides income protection coverage for food delivery partners. Coverage includes: Loss of income due to adverse weather conditions (heavy rain, storms, extreme heat), poor air quality (AQI above 300), and accidental injury during delivery. Claims are processed automatically based on verified conditions.',
+    question: 'What is covered under GigKavach policy?',
+    answer: 'GigKavach provides income protection coverage for food delivery partners. Coverage includes: Loss of income due to adverse weather conditions (heavy rain, storms, extreme heat), poor air quality (AQI above 300), and accidental injury during delivery. Claims are processed automatically based on verified conditions.',
     category: 'Policy Coverage'
   },
   {
     id: '2',
     question: 'How do I file a claim?',
-    answer: 'GigShield uses automatic claim processing. When adverse conditions are detected (weather/AQI) during your active delivery hours, claims are automatically generated and processed. For injury claims, you need to submit medical documentation through the app within 24 hours of the incident.',
+    answer: 'GigKavach uses automatic claim processing. When adverse conditions are detected (weather/AQI) during your active delivery hours, claims are automatically generated and processed. For injury claims, you need to submit medical documentation through the app within 24 hours of the incident.',
     category: 'Claims'
   },
   {
@@ -52,8 +52,8 @@ const IRDAI_FAQS: FAQ[] = [
   },
   {
     id: '6',
-    question: 'Who regulates GigShield?',
-    answer: 'GigShield is regulated by the Insurance Regulatory and Development Authority of India (IRDAI). We comply with all IRDAI guidelines for insurance products. Our IRDAI registration number and compliance details are available in the Policy section.',
+    question: 'Who regulates GigKavach?',
+    answer: 'GigKavach is regulated by the Insurance Regulatory and Development Authority of India (IRDAI). We comply with all IRDAI guidelines for insurance products. Our IRDAI registration number and compliance details are available in the Policy section.',
     category: 'Regulations'
   },
   {
