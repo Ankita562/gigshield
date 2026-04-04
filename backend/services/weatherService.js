@@ -45,7 +45,7 @@ async function runConsensusEngine() {
             console.log(`✅ SOURCE 2 (IMD Official Data): ${imdRainMm} mm/hr detected.`);
         } catch (e) {
             console.log(`⚠️ SOURCE 2 (IMD) Failed: ${e.message}`);
-             imdRainMm = 48;
+             imdRainMm = 50;
             console.log(`   -> 🛠️ OVERRIDE: Injecting IMD test data (26mm) to keep engine running.`);
         }
 
@@ -82,6 +82,6 @@ async function runConsensusEngine() {
 
 // Run immediately for testing
 runConsensusEngine();
-cron.schedule("*/5 * * * *", () => {
+cron.schedule("0 * * * *", () => {
     runConsensusEngine();
 });

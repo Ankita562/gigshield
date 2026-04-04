@@ -63,6 +63,7 @@ import { Auth,RequireAuth } from "./pages/Auth";
 import { Signup } from "./pages/Signup";
 import {Login} from "./pages/Login";
 import  { Help }  from "./pages/Help";
+import {Claims} from "./pages/Claims";
 export const router = createBrowserRouter([
   {
     path: "/login",
@@ -71,6 +72,10 @@ export const router = createBrowserRouter([
   {
     path:"/signup",
     element:<Signup/>,
+  },
+  {
+    path:"/claims",
+    element:<Claims/>,
   },
   {
     path: "/",

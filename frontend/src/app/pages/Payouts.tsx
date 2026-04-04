@@ -6,6 +6,7 @@ type Claim = {
   _id: string;
   amount: number;
   reason: string;
+  status:string;
   createdAt: string;
 };
 
@@ -28,11 +29,16 @@ export function Payouts() {
 const user = JSON.parse(localStorage.getItem("gigshield_user") || "null");
 
 useEffect(() => {
+  const fetchData=()=>{
   fetch(`http://localhost:5000/api/claims/${user._id}`)
     .then(res => res.json())
     .then(data => setPayouts(data))
     .catch(err => console.error(err));
-}, []);
+};
+fetchData();
+const interval=setInterval(fetchData,5000);
+return()=>clearInterval(interval);
+},[]);
 
   // Calculate actual payouts with AI logic
  const payoutsWithCalculations = payouts.map((p) => ({
@@ -43,7 +49,7 @@ useEffect(() => {
   triggerType: p.reason === "Heavy Rain" ? "rain" : "pollution",
   value: p.reason === "Heavy Rain" ? "40mm+" : "AQI 300+",
   severity: "High",
-  status: "paid",
+  status: p.status==="approved"?"paid" : "rejetced",
   upiRef: "AUTO",
   processingTime: "5 mins",
   baseAmount: p.amount,
@@ -56,8 +62,10 @@ useEffect(() => {
 
   // Filter payouts based on active filter
   const filteredPayouts = payoutsWithCalculations.filter(p => {
-    if (activeFilter === 'all') return true;
-    return p.status === activeFilter;
+    if (activeFilter === 'all') return p.status==="paid" && p.amount>0;
+    if (activeFilter === 'paid') return p.status==="paid" && p.amount>0;
+    if (activeFilter === 'pending') return p.status="pending";
+    return false;
   });
 
   const totalPaid = payoutsWithCalculations.filter(p => p.status === 'paid').reduce((sum, p) => sum + p.amount, 0);
@@ -216,17 +224,17 @@ useEffect(() => {
                   </div>
                 </div>
                 <div className="text-right ml-3">
-                  <p className="text-2xl font-bold text-emerald-600">+₹{payout.amount}</p>
+                  <p className={`text-2xl font-bold ${payout.status==='paid'? "text-emerald-600" : "text-red-500"}`}>{payout.status==="paid"? `+₹${payout.amount}` : "₹0"}</p>
                   <div className="flex items-center gap-1 justify-end mt-1">
                     {payout.status === 'paid' ? (
                       <>
-                        <CheckCircle className="w-3.5 h-3.5 text-emerald-600" strokeWidth={2.5} />
+                        <CheckCircle className="w-3.5 h-3.5 text-emerald-600"  />
                         <span className="text-xs font-semibold text-emerald-600">Paid</span>
                       </>
                     ) : (
                       <>
-                        <div className="w-3.5 h-3.5 border-2 border-amber-600 border-t-transparent rounded-full animate-spin"></div>
-                        <span className="text-xs font-semibold text-amber-600">Processing</span>
+                        <AlertCircle className="w-3.5 h-3.5 text-red-600 "/>
+                        <span className="text-xs font-semibold text-amber-600">Rejected</span>
                       </>
                     )}
                   </div>
