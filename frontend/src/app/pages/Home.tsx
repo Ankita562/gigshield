@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { API_BASE } from '../../config'
 import {FloatingHelpButton } from '../components/FloatingHelpButton';
+import customLogo from '../../assets/logo.png';
 
 const getNextSunday = () => {
   const d = new Date();
@@ -56,14 +57,27 @@ export function Home() {
         </div>
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 bg-white/15 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/20">
-              <Shield className="w-6 h-6 text-white" strokeWidth={2.5} />
+            
+            {/* LOGO CONTAINER */}
+            <div className="w-18 h-18 bg-white/15 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/20 overflow-hidden">
+              {/* WE SWAPPED THE SHIELD FOR YOUR CUSTOM LOGO */}
+              <img 
+                src={customLogo} 
+                alt="GigKavach Shield" 
+                className="w-20 h-20 object-contain drop-shadow-md" 
+              />
             </div>
-            <h1 className="text-3xl font-bold tracking-tight">GigKavach</h1>
+            
+            <h1 
+              className="text-4xl font-bold drop-shadow-md" 
+              style={{ fontFamily: "'Times New Roman', Times, serif", letterSpacing: "0.5px" }}
+            >
+              GigKavach
+            </h1>
           </div>
           <p className="text-[#8da9c4] text-sm flex items-center gap-2 ml-1">
-            <span className="w-2 h-2 bg-emerald-400 rounded-full"></span>
-            {user.location}
+            <span className="w-2.5 h-2.5 bg-emerald-400 rounded-full shadow-[0_0_8px_rgba(52,211,153,0.8)] animate-pulse"></span>
+            {user.location || "Koramangala, Bengaluru"}
           </p>
         </div>
       </div>
