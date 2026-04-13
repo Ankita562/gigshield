@@ -2,6 +2,8 @@ import axios from 'axios';
 import cron from 'node-cron';
 import 'dotenv/config';
 import User from "../models/User.js";
+// This tells the backend how to talk to itself!
+const API_BASE = process.env.RENDER_EXTERNAL_URL || `http://127.0.0.1:${process.env.PORT || 5000}`;
 
 const ZOMATO_KEY = process.env.ZOMATO_KEY; 
 const IMD_API_KEY = process.env.IMD_API_KEY;
