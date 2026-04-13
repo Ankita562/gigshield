@@ -83,7 +83,7 @@ export async function runConsensusEngine() {
             const users = await User.find();
             for (const user of users) {
                 try {
-                    const res = await axios.post("${API_BASE}/api/trigger-claim", {
+                    const res = await axios.post(`${API_BASE}/api/trigger-claim`, {
                         userId: user._id,
                         rainfall: Math.max(zomatoRainMm, imdRainMm, meteoRainMm), // Send the highest recorded value
                         aqi: 0

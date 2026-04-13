@@ -54,6 +54,8 @@ import { Shield, Phone, ArrowRight, AlertCircle, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
+import { API_BASE } from "../../config";
+
 export function Login() {
   const [phone, setPhone] = useState("");
   const [error, setError] = useState("");
@@ -77,7 +79,7 @@ useEffect(() => {
     setIsSubmitting(true);
 
     try {
-      const res = await fetch("${API_BASE}/api/login", {
+      const res = await fetch(`${API_BASE}/api/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"

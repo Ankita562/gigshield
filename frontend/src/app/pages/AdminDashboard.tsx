@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
-
+import { API_BASE } from "../../config";
 function AdminDashboard() {
   const [engineStatus, setEngineStatus] = useState('Standby... Awaiting manual trigger.');
   const [payoutTriggered, setPayoutTriggered] = useState(false);
@@ -22,7 +22,7 @@ function AdminDashboard() {
     setEngineStatus('Polling Triple-Threat Consensus Engine...');
     
     try {
-      const response = await fetch('${API_BASE}/api/weather/check');
+      const response = await fetch(`${API_BASE}/api/weather/check`);
       if (!response.ok) throw new Error('Network response was not ok');
       const data = await response.json();
       
