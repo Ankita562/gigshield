@@ -1,6 +1,7 @@
 import { MobileLayout } from '../components/MobileLayout';
 import { useEffect, useState } from 'react';
 import { CheckCircle, AlertCircle } from 'lucide-react';
+import { API_BASE } from '../../config';
 
 export function Claims() {
   const [claims, setClaims] = useState<any[]>([]);
@@ -16,7 +17,7 @@ export function Claims() {
   useEffect(() => {
     if (!user?._id) return;
 
-    fetch(`http://localhost:5000/api/claims/${user._id}`)
+    fetch(`${API_BASE}/api/claims/${user._id}`)
       .then(res => res.json())
       .then(data => setClaims(data))
       .catch(err => console.log(err));

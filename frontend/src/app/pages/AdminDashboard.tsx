@@ -22,7 +22,7 @@ function AdminDashboard() {
     setEngineStatus('Polling Triple-Threat Consensus Engine...');
     
     try {
-      const response = await fetch('http://localhost:5000/api/weather/check');
+      const response = await fetch('${API_BASE}/api/weather/check');
       if (!response.ok) throw new Error('Network response was not ok');
       const data = await response.json();
       

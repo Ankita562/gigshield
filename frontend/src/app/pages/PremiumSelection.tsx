@@ -2,7 +2,7 @@ import { MobileLayout } from '../components/MobileLayout';
 import { Shield, Check, Sparkles, TrendingUp, Zap, AlertCircle, ChevronRight } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-
+import { API_BASE } from '../../config';
 type PlanTier = 'basic' | 'standard' | 'premium';
 
 export function PremiumSelection() {
@@ -80,7 +80,7 @@ export function PremiumSelection() {
   const handlePurchase = async() => {
     const user=JSON.parse(localStorage.getItem("gigshield_user")||"null");
 
-    await fetch("http://localhost:5000/api/policy/buy",{
+    await fetch(`${API_BASE}/api/policy/buy`,{
       method:"Post",
       headers:{
         "Content-Type":"application/json"

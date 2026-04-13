@@ -1,6 +1,7 @@
 import { MobileLayout } from '../components/MobileLayout';
 import { CheckCircle, CloudRain, Wind, Zap, ThermometerSun, CloudDrizzle, Filter, TrendingUp, AlertCircle, Sparkles, Info } from 'lucide-react';
 import { useState,useEffect } from 'react';
+import { API_BASE } from '../../config';
 
 type Claim = {
   _id: string;
@@ -30,7 +31,7 @@ const user = JSON.parse(localStorage.getItem("gigshield_user") || "null");
 
 useEffect(() => {
   const fetchData=()=>{
-  fetch(`http://localhost:5000/api/claims/${user._id}`)
+  fetch(`${API_BASE}/api/claims/${user._id}`)
     .then(res => res.json())
     .then(data => setPayouts(data))
     .catch(err => console.error(err));

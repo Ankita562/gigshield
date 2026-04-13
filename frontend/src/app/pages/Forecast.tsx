@@ -1,11 +1,13 @@
 import { MobileLayout } from '../components/MobileLayout';
 import { CloudRain, Wind, Thermometer, AlertCircle, CheckCircle } from 'lucide-react';
 import {useState,useEffect} from 'react';
+import { API_BASE } from '../../config';
+
 export function Forecast() {
  const [forecast, setForecast] = useState<any[]>([]);
 const user = JSON.parse(localStorage.getItem("gigshield_user") || "null");
 useEffect(() => {
-  fetch(`http://localhost:5000/api/forecast/${user._id}`)
+  fetch(`${API_BASE}/api/forecast/${user._id}`)
     .then(res => res.json())
     .then(data => setForecast(data))
     .catch(err => console.log(err));
