@@ -360,15 +360,13 @@ DEMO_MODE=true
 
 ```
  
-### Step 3 — Run Python Risk Engine (Port 5001)
-Open a terminal and set up an isolated Python environment:
+### Step 3 — Train the ML Fraud Engine
+Our Random Forest model is trained on a dataset of 5,000+ historical claims. To install the dependencies and generate the `fraud_model.pkl` brain, run:
+
 ```bash
-cd backend
-python -m venv venv
-# Activate the environment (Windows: venv\Scripts\activate | Mac/Linux: source venv/bin/activate)
-source venv/Scripts/activate 
-pip install flask flask-cors scikit-learn pandas numpy joblib
-python risk_model.py
+cd ml
+pip install -r requirements.txt
+python train_model.py
 ```
  
 ### Step 4 — Run Node.js Backend (Port 5000)
