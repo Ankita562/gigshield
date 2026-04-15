@@ -325,16 +325,16 @@ flowchart LR
 
 | Layer | Technology |
 |---|---|
-| Frontend | ReactNative + Tailwind CSS |
+| Frontend | React Native + Tailwind CSS |
 | Backend | Node.js + Express |
-| AI Service | Python + Flask + Scikit-learn |
-| Database | MongoDB |
-| APIs | OpenWeatherMap, AQICN, Nager.Date, Razorpay Test Mode |
-| KYC | Tesseract.js (OCR) + Liveness Check |
-| Deploy | Vercel (frontend), Render (backend) |
-| Weather (Primary) | Weather Union API (Zomato) | 750+ ground stations, 1-min refresh |
-| Weather (Backup) | IMD via indianapi.in | Government-certified, IRDAI audit credible |
-| Weather (Fallback) | Open-Meteo | Free, no key, 1km resolution |
+| AI Fraud Engine | Python (scikit-learn) via Node.js Child Process |
+| Database | MongoDB Atlas |
+| Payment Gateway | Razorpay (Test Mode) |
+| Weather (Live Demo) | Open-Meteo (No-key fallback for live hackathon demo) |
+| Weather (Enterprise) | Weather Union API (Zomato) + IMD via indianapi.in |
+| Deploy | Vercel (Admin Dashboard), Render (Backend) |
+
+> *Note: Full Aadhaar OCR (Tesseract.js) and Liveness Checks are mapped out for Phase 3 enterprise compliance but bypassed in the current demo for speed.*
 
 Microservices architecture — AI service runs independently so ML models can be updated without touching the main backend.
 
