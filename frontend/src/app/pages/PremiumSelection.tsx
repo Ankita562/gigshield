@@ -1,103 +1,184 @@
-import { MobileLayout } from '../components/MobileLayout';
-import { Shield, Check, Sparkles, TrendingUp, Zap, AlertCircle, ChevronRight } from 'lucide-react';
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { API_BASE } from '../../config';
-type PlanTier = 'basic' | 'standard' | 'premium';
+import { Check, Zap, ArrowRight, Loader2, Info, Shield, Sparkles, TrendingUp, AlertCircle, ChevronRight } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { MobileLayout } from "../components/MobileLayout";
+import { useAuth } from "../../contexts/AuthContext";
+
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
+}
+
+type PlanTier = "Basic" | "Standard" | "Premium";
 
 export function PremiumSelection() {
   const navigate = useNavigate();
-  const [selectedPlan, setSelectedPlan] = useState<PlanTier>('standard');
-  const [showConfirmation, setShowConfirmation] = useState(false);
+  const { user: authUser, token: authToken } = useAuth();
+  const [activeTab, setActiveTab] = useState<PlanTier>("Standard");
+  const [agreed, setAgreed] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [paymentSuccess, setPaymentSuccess] = useState(false);
+  const [subscribedPlan, setSubscribedPlan] = useState("");
 
-  const plans = {
-    basic: {
-      name: 'Basic Shield',
-      price: 30,
-      popular: false,
-      color: 'from-[#8da9c4] to-[#134074]',
-      features: [
-        { text: 'Rainfall protection (>40mm)', included: true },
-        { text: 'AQI protection (>300)', included: true },
-        { text: 'Max payout: ₹400 per event', included: true },
-        { text: 'Unlimited weekly events', included: true },
-        { text: 'Heat wave protection', included: false },
-        { text: 'Storm protection', included: false },
-        { text: 'Priority claim processing', included: false },
-        { text: 'Premium lock guarantee', included: false },
-      ],
-      triggers: [
-        'Rainfall > 40mm in 24hrs → ₹400',
-        'AQI > 300 → ₹400',
-      ],
-    },
-    standard: {
-      name: 'Standard Shield',
-      price: 45,
-      popular: true,
-      color: 'from-[#134074] to-[#0b2545]',
-      features: [
-        { text: 'Rainfall protection (>40mm)', included: true },
-        { text: 'AQI protection (>300)', included: true },
-        { text: 'Max payout: ₹600 per event', included: true },
-        { text: 'Unlimited weekly events', included: true },
-        { text: 'Heat wave protection (≥40°C)', included: true },
-        { text: 'Storm protection (>55km/h)', included: true },
-        { text: 'Priority claim processing', included: false },
-        { text: 'Premium lock guarantee', included: false },
-      ],
-      triggers: [
-        'Rainfall > 40mm in 24hrs → ₹600',
-        'AQI > 300 → ₹600',
-        'Temperature ≥ 40°C → ₹600',
-        'Wind > 55km/h → ₹600',
-      ],
-    },
-    premium: {
-      name: 'Premium Shield',
-      price: 70,
-      popular: false,
-      color: 'from-[#0b2545] via-[#13315c] to-[#134074]',
-      features: [
-        { text: 'Rainfall protection (>35mm)', included: true },
-        { text: 'AQI protection (>250)', included: true },
-        { text: 'Max payout: ₹1000 per event', included: true },
-        { text: 'Unlimited weekly events', included: true },
-        { text: 'Heat wave protection (≥38°C)', included: true },
-        { text: 'Storm protection (>45km/h)', included: true },
-        { text: 'Priority claim processing (<3 mins)', included: true },
-        { text: 'Premium lock guarantee (6 weeks)', included: true },
-      ],
-      triggers: [
-        'Rainfall > 35mm in 24hrs → ₹1000',
-        'AQI > 250 → ₹1000',
-        'Temperature ≥ 38°C → ₹1000',
-        'Wind > 45km/h → ₹1000',
-      ],
-    },
+  // Plan data (matches code 2)
+  const planData = {
+    Basic: { price: 30, payout: 400, rain: 40, aqi: 300, name: "Basic Shield", popular: false, color: "from-[#8da9c4] to-[#134074]" },
+    Standard: { price: 45, payout: 600, rain: 40, aqi: 300, name: "Standard Shield", popular: true, color: "from-[#134074] to-[#0b2545]" },
+    Premium: { price: 70, payout: 1000, rain: 35, aqi: 250, name: "Premium Shield", popular: false, color: "from-[#0b2545] via-[#13315c] to-[#134074]" },
   };
 
-  const handlePurchase = async() => {
-    const user=JSON.parse(localStorage.getItem("gigshield_user")||"null");
+  const current = planData[activeTab];
+  const currentUser = authUser || JSON.parse(localStorage.getItem("gigshield_user") || "null");
+  const currentToken = authToken || localStorage.getItem("token");
 
-    await fetch(`${API_BASE}/api/policy/buy`,{
-      method:"Post",
-      headers:{
-        "Content-Type":"application/json"
-      },
-      body:JSON.stringify({
-        userId:user._id,
-        premium:plans[selectedPlan].price
-      })
-    });
-    setShowConfirmation(true);
-    // Simulate purchase process
-    setTimeout(() => {
-      navigate('/');
-    }, 2000);
+  // Features mapping for UI
+  const getFeatures = (plan: PlanTier) => {
+    const features = {
+      Basic: [
+        { text: "Rainfall protection (>40mm)", included: true },
+        { text: "AQI protection (>300)", included: true },
+        { text: `Max payout: ₹${planData.Basic.payout} per event`, included: true },
+        { text: "Unlimited weekly events", included: true },
+        { text: "Heat wave protection", included: false },
+        { text: "Storm protection", included: false },
+        { text: "Priority claim processing", included: false },
+        { text: "Premium lock guarantee", included: false },
+      ],
+      Standard: [
+        { text: "Rainfall protection (>40mm)", included: true },
+        { text: "AQI protection (>300)", included: true },
+        { text: `Max payout: ₹${planData.Standard.payout} per event`, included: true },
+        { text: "Unlimited weekly events", included: true },
+        { text: "Heat wave protection (≥40°C)", included: true },
+        { text: "Storm protection (>55km/h)", included: true },
+        { text: "Priority claim processing", included: false },
+        { text: "Premium lock guarantee", included: false },
+      ],
+      Premium: [
+        { text: "Rainfall protection (>35mm)", included: true },
+        { text: "AQI protection (>250)", included: true },
+        { text: `Max payout: ₹${planData.Premium.payout} per event`, included: true },
+        { text: "Unlimited weekly events", included: true },
+        { text: "Heat wave protection (≥38°C)", included: true },
+        { text: "Storm protection (>45km/h)", included: true },
+        { text: "Priority claim processing (<3 mins)", included: true },
+        { text: "Premium lock guarantee (6 weeks)", included: true },
+      ],
+    };
+    return features[plan];
   };
 
-  if (showConfirmation) {
+  const getTriggers = (plan: PlanTier) => {
+    const triggers = {
+      Basic: [
+        `Rainfall > ${planData.Basic.rain}mm in 24hrs → ₹${planData.Basic.payout}`,
+        `AQI > ${planData.Basic.aqi} → ₹${planData.Basic.payout}`,
+      ],
+      Standard: [
+        `Rainfall > ${planData.Standard.rain}mm in 24hrs → ₹${planData.Standard.payout}`,
+        `AQI > ${planData.Standard.aqi} → ₹${planData.Standard.payout}`,
+        "Temperature ≥ 40°C → ₹600",
+        "Wind > 55km/h → ₹600",
+      ],
+      Premium: [
+        `Rainfall > ${planData.Premium.rain}mm in 24hrs → ₹${planData.Premium.payout}`,
+        `AQI > ${planData.Premium.aqi} → ₹${planData.Premium.payout}`,
+        "Temperature ≥ 38°C → ₹1000",
+        "Wind > 45km/h → ₹1000",
+      ],
+    };
+    return triggers[plan];
+  };
+
+  // Load Razorpay SDK
+  useEffect(() => {
+    if (!window.Razorpay) {
+      const script = document.createElement("script");
+      script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      script.async = true;
+      document.body.appendChild(script);
+    }
+  }, []);
+
+  const handlePayment = async () => {
+    if (!currentUser || !currentToken) {
+      alert("Please login to continue");
+      navigate("/login");
+      return;
+    }
+    if (!agreed) return;
+    setIsProcessing(true);
+
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
+      const orderRes = await fetch(`${apiUrl}/api/payments/create-order`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${currentToken}` },
+        body: JSON.stringify({ amount: current.price * 100, planType: activeTab }),
+      });
+      const orderData = await orderRes.json();
+      if (!orderRes.ok) throw new Error(orderData.message);
+
+      const options = {
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+        amount: orderData.amount,
+        currency: "INR",
+        name: "GigKavach",
+        description: `${activeTab} Shield Activation`,
+        order_id: orderData.orderId,
+        theme: { color: "#13315C" },
+        prefill: { name: currentUser.name, contact: currentUser.phone },
+        handler: async (response: any) => {
+          const verifyRes = await fetch(`${apiUrl}/api/payments/verify`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", Authorization: `Bearer ${currentToken}` },
+            body: JSON.stringify({ ...response, planType: activeTab, amount: current.price }),
+          });
+          const verifyData = await verifyRes.json();
+          if (verifyRes.ok && verifyData.success) {
+            // Store planType directly on user object (persistent)
+            const existingUser = JSON.parse(localStorage.getItem("gigshield_user") || "{}");
+            const updatedUser = {
+              ...existingUser,
+              ...verifyData.user,
+              hasActivePlan: true,
+              planType: activeTab,
+              planPrice: current.price,
+              planThresholds: {
+                rain: current.rain,
+                aqi: current.aqi,
+                dailyPayout: current.payout,
+              },
+            };
+            localStorage.setItem("gigshield_user", JSON.stringify(updatedUser));
+            // Optional policy backup
+            const activePolicy = {
+              isActive: true,
+              planType: activeTab,
+              amount: current.price,
+              rainThreshold: current.rain,
+              aqiThreshold: current.aqi,
+              dailyPayout: current.payout,
+            };
+            localStorage.setItem("gigshield_policy", JSON.stringify(activePolicy));
+            setSubscribedPlan(activeTab);
+            setPaymentSuccess(true);
+          } else {
+            throw new Error(verifyData.message || "Payment verification failed");
+          }
+        },
+        modal: { ondismiss: () => setIsProcessing(false) },
+      };
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+    } catch (err: any) {
+      alert(err.message || "Payment failed");
+      setIsProcessing(false);
+    }
+  };
+
+  if (paymentSuccess) {
     return (
       <MobileLayout>
         <div className="min-h-screen bg-gradient-to-br from-[#eef4ed] to-[#8da9c4]/20 flex items-center justify-center px-6">
@@ -105,14 +186,20 @@ export function PremiumSelection() {
             <div className="w-20 h-20 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce">
               <Check className="w-10 h-10 text-white" strokeWidth={3} />
             </div>
-            <h2 className="text-2xl font-bold text-[#0b2545] mb-2">Policy Activated!</h2>
+            <h2 className="text-2xl font-bold text-[#0b2545] mb-2">Shield Active!</h2>
             <p className="text-[#13315c] mb-4">
-              Your {plans[selectedPlan].name} is now active. You're protected 24/7.
+              Your {current.name} is now active. You're protected 24/7.
             </p>
             <div className="bg-[#eef4ed] rounded-xl p-4 border border-[#8da9c4]/40">
               <p className="text-sm text-[#13315c]/70 mb-1">Weekly Premium</p>
-              <p className="text-3xl font-bold text-[#134074]">₹{plans[selectedPlan].price}</p>
+              <p className="text-3xl font-bold text-[#134074]">₹{current.price}</p>
             </div>
+            <button
+              onClick={() => navigate("/home")}
+              className="mt-6 w-full bg-[#134074] text-white py-3 rounded-xl font-bold"
+            >
+              Go to Dashboard
+            </button>
           </div>
         </div>
       </MobileLayout>
@@ -121,13 +208,12 @@ export function PremiumSelection() {
 
   return (
     <MobileLayout>
-      {/* Header */}
+      {/* Header - unified gradient with blurred circles */}
       <div className="relative bg-gradient-to-br from-[#134074] via-[#13315c] to-[#0b2545] text-white px-6 pt-12 pb-20 overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-0 right-0 w-96 h-96 bg-[#8da9c4] rounded-full blur-3xl"></div>
           <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#0b2545] rounded-full blur-3xl"></div>
         </div>
-        
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-2">
             <div className="w-10 h-10 bg-white/15 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/20">
@@ -141,14 +227,16 @@ export function PremiumSelection() {
 
       {/* Plan Cards */}
       <div className="px-6 -mt-12 mb-6 space-y-4 relative z-20">
-        {(Object.keys(plans) as PlanTier[]).map((planKey) => {
-          const plan = plans[planKey];
+        {(["Basic", "Standard", "Premium"] as const).map((planKey) => {
+          const plan = planData[planKey];
+          const features = getFeatures(planKey);
+          const triggers = getTriggers(planKey);
           return (
             <div
               key={planKey}
-              onClick={() => setSelectedPlan(planKey)}
+              onClick={() => setActiveTab(planKey)}
               className={`relative rounded-2xl overflow-hidden transition-all cursor-pointer ${
-                selectedPlan === planKey
+                activeTab === planKey
                   ? 'ring-4 ring-[#134074] shadow-2xl scale-[1.02]'
                   : 'shadow-lg hover:shadow-xl'
               }`}
@@ -170,7 +258,7 @@ export function PremiumSelection() {
                     <h3 className="text-2xl font-bold mb-1">{plan.name}</h3>
                     <p className="text-sm text-white/80">Comprehensive protection</p>
                   </div>
-                  {selectedPlan === planKey && (
+                  {activeTab === planKey && (
                     <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center">
                       <Check className="w-5 h-5 text-[#134074]" strokeWidth={3} />
                     </div>
@@ -191,7 +279,7 @@ export function PremiumSelection() {
                     <span className="text-xs font-bold text-[#134074] uppercase tracking-wide">Auto-Payout Triggers</span>
                   </div>
                   <div className="space-y-1">
-                    {plan.triggers.map((trigger, idx) => (
+                    {triggers.map((trigger, idx) => (
                       <p key={idx} className="text-xs text-[#13315c] font-medium">• {trigger}</p>
                     ))}
                   </div>
@@ -199,7 +287,7 @@ export function PremiumSelection() {
 
                 {/* Features List */}
                 <div className="space-y-3">
-                  {plan.features.map((feature, idx) => (
+                  {features.map((feature, idx) => (
                     <div key={idx} className="flex items-start gap-3">
                       {feature.included ? (
                         <div className="w-5 h-5 bg-emerald-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -267,22 +355,52 @@ export function PremiumSelection() {
         </div>
       </div>
 
-      {/* CTA Button */}
-      <div className="px-6 mb-8">
+      {/* Terms & CTA - with clickable Terms & Conditions link */}
+      <div className="px-6 space-y-4 mb-8">
+        <label className="flex items-start gap-3 cursor-pointer bg-slate-100/50 p-4 rounded-2xl border border-slate-100">
+          <input
+            type="checkbox"
+            checked={agreed}
+            onChange={(e) => setAgreed(e.target.checked)}
+            className="mt-1 w-5 h-5 rounded border-slate-300 accent-[#13315C]"
+          />
+          <span className="text-[10px] text-slate-500 font-bold leading-tight">
+            I agree to the{' '}
+            <a
+              href="https://razorpay.com/terms/"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className="text-[#13315C] underline cursor-pointer"
+            >
+              Terms & Conditions
+            </a>
+            . Protection starts immediately upon payment.
+          </span>
+        </label>
+
         <button
-          onClick={handlePurchase}
-          className="w-full bg-gradient-to-r from-[#134074] to-[#0b2545] text-white py-4 rounded-xl font-bold text-lg hover:shadow-2xl transition-all flex items-center justify-center gap-3 group"
+          onClick={handlePayment}
+          disabled={!agreed || isProcessing}
+          className="w-full bg-gradient-to-r from-[#134074] to-[#0b2545] text-white py-4 rounded-xl font-bold text-lg hover:shadow-2xl transition-all flex items-center justify-center gap-3 disabled:opacity-50"
         >
-          <Shield className="w-6 h-6" strokeWidth={2.5} />
-          Activate {plans[selectedPlan].name}
-          <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" strokeWidth={2.5} />
+          {isProcessing ? (
+            <Loader2 className="animate-spin w-6 h-6" />
+          ) : (
+            <>
+              <Shield className="w-6 h-6" strokeWidth={2.5} />
+              Activate {current.name}
+              <ChevronRight className="w-5 h-5 transition-transform group-hover:translate-x-1" strokeWidth={2.5} />
+            </>
+          )}
         </button>
-        <p className="text-center text-xs text-[#13315c]/60 mt-3">
-          ₹{plans[selectedPlan].price}/week • Cancel anytime • No hidden fees
+
+        <p className="text-center text-xs text-[#13315c]/60">
+          ₹{current.price}/week • Cancel anytime • No hidden fees
         </p>
       </div>
 
-      {/* Important Note */}
+      {/* Free Look Period Notice */}
       <div className="px-6 mb-6">
         <div className="bg-amber-50 rounded-xl p-4 border border-amber-200 flex items-start gap-3">
           <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" strokeWidth={2.5} />

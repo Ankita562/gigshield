@@ -1,76 +1,111 @@
 import { MobileLayout } from '../components/MobileLayout';
-import { CheckCircle, CloudRain, Wind, Zap, ThermometerSun, CloudDrizzle, Filter, TrendingUp, AlertCircle, Sparkles, Info } from 'lucide-react';
-import { useState,useEffect } from 'react';
+import {
+  CheckCircle,
+  CloudRain,
+  Wind,
+  Zap,
+  ThermometerSun,
+  CloudDrizzle,
+  TrendingUp,
+  AlertCircle,
+  Sparkles,
+  Info,
+} from 'lucide-react';
+import { useState, useEffect } from 'react';
 import { API_BASE } from '../../config';
 
 type Claim = {
   _id: string;
   amount: number;
   reason: string;
-  status:string;
+  status: string;
   createdAt: string;
 };
 
 export function Payouts() {
   const [activeFilter, setActiveFilter] = useState<'all' | 'paid' | 'pending'>('all');
-
-  // AI Payout Calculation System
-  const calculatePayout = (
-    baseAmount: number,
-    severityMultiplier: number,
-    rarityFactor: number,
-    riskFactor: number,
-    cap: { min: number; max: number }
-  ) => {
-    const calculated = Math.round(baseAmount * severityMultiplier * rarityFactor * riskFactor);
-    return Math.min(Math.max(calculated, cap.min), cap.max);
-  };
-
   const [payouts, setPayouts] = useState<Claim[]>([]);
-const user = JSON.parse(localStorage.getItem("gigshield_user") || "null");
+  const [loading, setLoading] = useState(true);
+  const user = JSON.parse(localStorage.getItem("gigshield_user") || "null");
 
-useEffect(() => {
-  const fetchData=()=>{
-  fetch(`${API_BASE}/api/claims/${user._id}`)
-    .then(res => res.json())
-    .then(data => setPayouts(data))
-    .catch(err => console.error(err));
-};
-fetchData();
-const interval=setInterval(fetchData,5000);
-return()=>clearInterval(interval);
-},[]);
+  useEffect(() => {
+    if (!user?._id && !user?.id) {
+      setLoading(false);
+      return;
+    }
 
-  // Calculate actual payouts with AI logic
- const payoutsWithCalculations = payouts.map((p) => ({
-  id: p._id,
-  date: new Date(p.createdAt).toDateString(),
-  time: new Date(p.createdAt).toLocaleTimeString(),
-  trigger: p.reason,
-  triggerType: p.reason === "Heavy Rain" ? "rain" : "pollution",
-  value: p.reason === "Heavy Rain" ? "40mm+" : "AQI 300+",
-  severity: "High",
-  status: p.status==="approved"?"paid" : "rejetced",
-  upiRef: "AUTO",
-  processingTime: "5 mins",
-  baseAmount: p.amount,
-  severityMultiplier: 1,
-  rarityFactor: 1,
-  riskFactor: 1,
-  cap: { min: p.amount, max: p.amount },
-  amount: p.amount
-}));
+    const userId = user._id || user.id;
 
-  // Filter payouts based on active filter
-  const filteredPayouts = payoutsWithCalculations.filter(p => {
-    if (activeFilter === 'all') return p.status==="paid" && p.amount>0;
-    if (activeFilter === 'paid') return p.status==="paid" && p.amount>0;
-    if (activeFilter === 'pending') return p.status="pending";
+    const fetchData = () => {
+      fetch(`${API_BASE}/api/claims/${userId}`)
+        .then((res) => res.json())
+        .then((data) => {
+          if (Array.isArray(data)) {
+            setPayouts(data);
+          } else if (Array.isArray(data?.claims)) {
+            setPayouts(data.claims);
+          } else {
+            setPayouts([]);
+          }
+        })
+        .catch((err) => {
+          console.error(err);
+          setPayouts([]);
+        })
+        .finally(() => setLoading(false));
+    };
+
+    fetchData();
+    const interval = setInterval(fetchData, 5000);
+    return () => clearInterval(interval);
+  }, [user?._id, user?.id]);
+
+  // Transform payouts with calculated fields (same as first version)
+  const payoutsWithCalculations = payouts.map((p) => ({
+    id: p._id,
+    date: p.createdAt ? new Date(p.createdAt).toDateString() : "No date",
+    time: p.createdAt ? new Date(p.createdAt).toLocaleTimeString() : "-",
+    trigger: p.reason || "Unknown",
+    triggerType:
+      p.reason === "Heavy Rain"
+        ? "rain"
+        : p.reason === "Heatwave"
+        ? "heat"
+        : "pollution",
+    value:
+      p.reason === "Heavy Rain"
+        ? "40mm+"
+        : p.reason === "Heatwave"
+        ? "40°C+"
+        : "AQI 300+",
+    severity: "High",
+    status: p.status === "approved" ? "paid" : "rejected",
+    upiRef: "AUTO",
+    processingTime: "5 mins",
+    baseAmount: p.amount || 0,
+    severityMultiplier: 1,
+    rarityFactor: 1,
+    riskFactor: 1,
+    cap: { min: p.amount || 0, max: p.amount || 0 },
+    amount: p.amount || 0,
+  }));
+
+  // Filter based on active filter
+  const filteredPayouts = payoutsWithCalculations.filter((p) => {
+    if (activeFilter === 'all') return true;
+    if (activeFilter === 'paid') return p.status === "paid" && p.amount > 0;
+    if (activeFilter === 'pending') return p.status === "pending";
     return false;
   });
 
-  const totalPaid = payoutsWithCalculations.filter(p => p.status === 'paid').reduce((sum, p) => sum + p.amount, 0);
-  const thisMonthPayouts = payoutsWithCalculations.filter(p => p.date.includes('Mar') && p.status === 'paid');
+  const totalPaid = payoutsWithCalculations
+    .filter((p) => p.status === 'paid')
+    .reduce((sum, p) => sum + p.amount, 0);
+
+  const thisMonth = new Date().toLocaleString("en-US", { month: "short" });
+  const thisMonthPayouts = payoutsWithCalculations.filter(
+    (p) => p.date.includes(thisMonth) && p.status === 'paid'
+  );
   const thisMonthTotal = thisMonthPayouts.reduce((sum, p) => sum + p.amount, 0);
 
   const getEventIcon = (type: string) => {
@@ -118,13 +153,12 @@ return()=>clearInterval(interval);
 
   return (
     <MobileLayout>
-      {/* Hero Header - Oxford Navy Gradient */}
+      {/* Hero Header - matches Signup/Forecast gradient */}
       <div className="relative bg-gradient-to-br from-[#134074] via-[#13315c] to-[#0b2545] text-white px-6 pt-12 pb-24 overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-0 right-0 w-96 h-96 bg-[#8da9c4] rounded-full blur-3xl"></div>
           <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#0b2545] rounded-full blur-3xl"></div>
         </div>
-        
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-2">
             <div className="w-10 h-10 bg-white/15 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/20">
@@ -136,7 +170,7 @@ return()=>clearInterval(interval);
         </div>
       </div>
 
-      {/* Summary Cards - Overlapping */}
+      {/* Summary Cards */}
       <div className="px-6 -mt-16 mb-6 relative z-20">
         <div className="bg-[#eef4ed] rounded-2xl shadow-2xl p-6 border border-[#8da9c4]/30 mb-4">
           <div className="flex items-center justify-between mb-5">
@@ -145,14 +179,13 @@ return()=>clearInterval(interval);
               <p className="text-4xl font-bold text-[#0b2545]">₹{totalPaid.toLocaleString()}</p>
               <div className="mt-2 flex items-center gap-1.5 text-emerald-600">
                 <TrendingUp className="w-4 h-4" strokeWidth={2.5} />
-                <span className="text-xs font-semibold">{payouts.length} automatic payouts</span>
+                <span className="text-xs font-semibold">{payouts.length} payouts</span>
               </div>
             </div>
             <div className="w-16 h-16 bg-gradient-to-br from-[#134074] to-[#13315c] rounded-2xl flex items-center justify-center shadow-lg shadow-[#134074]/30">
               <CheckCircle className="w-9 h-9 text-white" strokeWidth={2.5} />
             </div>
           </div>
-          
           <div className="pt-4 border-t border-[#8da9c4]/40 grid grid-cols-2 gap-4">
             <div>
               <p className="text-xs text-[#13315c]/70 font-medium mb-1">This Month</p>
@@ -169,36 +202,19 @@ return()=>clearInterval(interval);
       {/* Filters */}
       <div className="px-6 mb-5">
         <div className="flex items-center gap-2">
-          <button
-            onClick={() => setActiveFilter('all')}
-            className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
-              activeFilter === 'all'
-                ? 'bg-[#134074] text-white shadow-md'
-                : 'bg-[#eef4ed] text-[#13315c] border border-[#8da9c4]/40'
-            }`}
-          >
-            All
-          </button>
-          <button
-            onClick={() => setActiveFilter('paid')}
-            className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
-              activeFilter === 'paid'
-                ? 'bg-[#134074] text-white shadow-md'
-                : 'bg-[#eef4ed] text-[#13315c] border border-[#8da9c4]/40'
-            }`}
-          >
-            Paid
-          </button>
-          <button
-            onClick={() => setActiveFilter('pending')}
-            className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
-              activeFilter === 'pending'
-                ? 'bg-[#134074] text-white shadow-md'
-                : 'bg-[#eef4ed] text-[#13315c] border border-[#8da9c4]/40'
-            }`}
-          >
-            Pending
-          </button>
+          {(["all", "paid", "pending"] as const).map((filter) => (
+            <button
+              key={filter}
+              onClick={() => setActiveFilter(filter)}
+              className={`px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
+                activeFilter === filter
+                  ? 'bg-[#134074] text-white shadow-md'
+                  : 'bg-[#eef4ed] text-[#13315c] border border-[#8da9c4]/40'
+              }`}
+            >
+              {filter[0].toUpperCase() + filter.slice(1)}
+            </button>
+          ))}
         </div>
       </div>
 
@@ -206,109 +222,111 @@ return()=>clearInterval(interval);
         <h2 className="text-lg font-bold text-[#0b2545]">Recent Payouts</h2>
       </div>
 
-      {/* Payout Cards with Enhanced Design */}
-      <div className="px-6 mb-6 space-y-3">
-        {filteredPayouts.map((payout) => (
-          <div key={payout.id} className="bg-[#eef4ed] rounded-2xl border border-[#8da9c4]/40 overflow-hidden shadow-sm">
-            {/* Header Section */}
-            <div className="p-5 pb-4">
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex items-center gap-3 flex-1">
-                  <div className="w-11 h-11 bg-[#8da9c4]/30 rounded-xl flex items-center justify-center flex-shrink-0">
-                    {getEventIcon(payout.triggerType)}
-                  </div>
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <p className="font-bold text-[#0b2545] text-base">{payout.trigger}</p>
+      {/* Payout Cards */}
+      <div className="px-6 mb-6 space-y-3 pb-28">
+        {loading ? (
+          <div className="bg-white rounded-2xl p-10 text-center shadow-sm border border-slate-100">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#134074] mx-auto mb-3"></div>
+            <p className="text-[#13315c] font-medium">Loading payouts...</p>
+          </div>
+        ) : filteredPayouts.length === 0 ? (
+          <div className="bg-white rounded-2xl p-10 text-center shadow-sm border border-slate-100">
+            <p className="text-[#13315c] font-medium">No payouts found</p>
+            <p className="text-xs text-[#13315c]/60 mt-1">Payouts will appear when weather conditions trigger them</p>
+          </div>
+        ) : (
+          filteredPayouts.map((payout) => (
+            <div key={payout.id} className="bg-[#eef4ed] rounded-2xl border border-[#8da9c4]/40 overflow-hidden shadow-sm">
+              <div className="p-5 pb-4">
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex items-center gap-3 flex-1">
+                    <div className="w-11 h-11 bg-[#8da9c4]/30 rounded-xl flex items-center justify-center flex-shrink-0">
+                      {getEventIcon(payout.triggerType)}
                     </div>
-                    <p className="text-xs text-[#13315c]/60">{payout.date} • {payout.time}</p>
+                    <div className="flex-1">
+                      <p className="font-bold text-[#0b2545] text-base">{payout.trigger}</p>
+                      <p className="text-xs text-[#13315c]/60">{payout.date} • {payout.time}</p>
+                    </div>
+                  </div>
+                  <div className="text-right ml-3">
+                    <p className={`text-2xl font-bold ${payout.status === 'paid' ? "text-emerald-600" : "text-red-500"}`}>
+                      {payout.status === "paid" ? `+₹${payout.amount}` : "₹0"}
+                    </p>
+                    <div className="flex items-center gap-1 justify-end mt-1">
+                      {payout.status === 'paid' ? (
+                        <>
+                          <CheckCircle className="w-3.5 h-3.5 text-emerald-600" />
+                          <span className="text-xs font-semibold text-emerald-600">Paid</span>
+                        </>
+                      ) : (
+                        <>
+                          <AlertCircle className="w-3.5 h-3.5 text-red-600" />
+                          <span className="text-xs font-semibold text-red-600">Rejected</span>
+                        </>
+                      )}
+                    </div>
                   </div>
                 </div>
-                <div className="text-right ml-3">
-                  <p className={`text-2xl font-bold ${payout.status==='paid'? "text-emerald-600" : "text-red-500"}`}>{payout.status==="paid"? `+₹${payout.amount}` : "₹0"}</p>
-                  <div className="flex items-center gap-1 justify-end mt-1">
-                    {payout.status === 'paid' ? (
-                      <>
-                        <CheckCircle className="w-3.5 h-3.5 text-emerald-600"  />
-                        <span className="text-xs font-semibold text-emerald-600">Paid</span>
-                      </>
-                    ) : (
-                      <>
-                        <AlertCircle className="w-3.5 h-3.5 text-red-600 "/>
-                        <span className="text-xs font-semibold text-amber-600">Rejected</span>
-                      </>
-                    )}
+
+                <div className="flex items-center gap-3 mb-3">
+                  <div className={`px-3 py-1 rounded-lg text-xs font-bold border ${getSeverityColor(payout.severity)}`}>
+                    {payout.severity} Severity
+                  </div>
+                  <div className="flex-1 h-2 bg-[#8da9c4]/20 rounded-full overflow-hidden">
+                    <div className={`h-full rounded-full transition-all ${getIntensityBar(payout.severity)}`}></div>
+                  </div>
+                </div>
+
+                <div className="bg-[#8da9c4]/15 rounded-xl p-3 border border-[#8da9c4]/30 mb-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs text-[#13315c]/70 font-medium mb-0.5">Trigger Value</p>
+                      <p className="text-lg font-bold text-[#134074]">{payout.value}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-xs text-[#13315c]/70 font-medium mb-0.5">Processing Time</p>
+                      <p className="text-sm font-bold text-[#0b2545]">{payout.processingTime}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-gradient-to-r from-[#134074]/5 to-[#13315c]/5 rounded-xl p-3 border border-[#134074]/20">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Sparkles className="w-4 h-4 text-[#134074]" strokeWidth={2.5} />
+                    <span className="text-xs font-bold text-[#134074]">AI Calculated Payout</span>
+                    <Info className="w-3.5 h-3.5 text-[#13315c]/60" strokeWidth={2} />
+                  </div>
+                  <div className="text-xs text-[#13315c]/80 font-mono leading-relaxed">
+                    <span className="text-[#0b2545] font-semibold">Base ₹{payout.baseAmount}</span>
+                    <span className="text-[#13315c]/60"> × </span>
+                    <span className="text-[#0b2545] font-semibold">Severity {payout.severityMultiplier}×</span>
+                    <span className="text-[#13315c]/60"> × </span>
+                    <span className="text-[#0b2545] font-semibold">Rarity {payout.rarityFactor}×</span>
+                    <span className="text-[#13315c]/60"> × </span>
+                    <span className="text-[#0b2545] font-semibold">Risk {payout.riskFactor}×</span>
+                  </div>
+                  <div className="mt-2 pt-2 border-t border-[#8da9c4]/30 flex items-center justify-between">
+                    <span className="text-xs text-[#13315c]/70">Capped Range:</span>
+                    <span className="text-xs font-bold text-[#134074]">₹{payout.cap.min}–₹{payout.cap.max}</span>
                   </div>
                 </div>
               </div>
 
-              {/* Severity Badge & Intensity Bar */}
-              <div className="flex items-center gap-3 mb-3">
-                <div className={`px-3 py-1 rounded-lg text-xs font-bold border ${getSeverityColor(payout.severity)}`}>
-                  {payout.severity} Severity
-                </div>
-                <div className="flex-1 h-2 bg-[#8da9c4]/20 rounded-full overflow-hidden">
-                  <div className={`h-full rounded-full transition-all ${getIntensityBar(payout.severity)}`}></div>
-                </div>
-              </div>
-
-              {/* Trigger Value Display */}
-              <div className="bg-[#8da9c4]/15 rounded-xl p-3 border border-[#8da9c4]/30 mb-3">
-                <div className="flex items-center justify-between">
+              <div className="bg-[#8da9c4]/10 px-5 py-3 border-t border-[#8da9c4]/30">
+                <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <p className="text-xs text-[#13315c]/70 font-medium mb-0.5">Trigger Value</p>
-                    <p className="text-lg font-bold text-[#134074]">{payout.value}</p>
+                    <p className="text-xs text-[#13315c]/70 font-medium mb-0.5">Payout ID</p>
+                    <p className="text-xs font-mono text-[#0b2545]">{payout.id}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-xs text-[#13315c]/70 font-medium mb-0.5">Processing Time</p>
-                    <p className="text-sm font-bold text-[#0b2545]">{payout.processingTime}</p>
+                    <p className="text-xs text-[#13315c]/70 font-medium mb-0.5">UPI Reference</p>
+                    <p className="text-xs font-mono text-[#0b2545]">{payout.upiRef}</p>
                   </div>
                 </div>
               </div>
-
-              {/* AI Calculation Breakdown */}
-              <div className="bg-gradient-to-r from-[#134074]/5 to-[#13315c]/5 rounded-xl p-3 border border-[#134074]/20">
-                <div className="flex items-center gap-2 mb-2">
-                  <Sparkles className="w-4 h-4 text-[#134074]" strokeWidth={2.5} />
-                  <span className="text-xs font-bold text-[#134074]">AI Calculated Payout</span>
-                  <div className="group relative">
-                    <Info className="w-3.5 h-3.5 text-[#13315c]/60 cursor-help" strokeWidth={2} />
-                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:block w-56 bg-[#0b2545] text-white text-xs rounded-lg p-2.5 shadow-xl z-10">
-                      <p className="leading-relaxed">Payout dynamically calculated based on environmental risk severity, event rarity, and your exposure level.</p>
-                    </div>
-                  </div>
-                </div>
-                <div className="text-xs text-[#13315c]/80 font-mono leading-relaxed">
-                  <span className="text-[#0b2545] font-semibold">Base ₹{payout.baseAmount}</span>
-                  <span className="text-[#13315c]/60"> × </span>
-                  <span className="text-[#0b2545] font-semibold">Severity {payout.severityMultiplier}×</span>
-                  <span className="text-[#13315c]/60"> × </span>
-                  <span className="text-[#0b2545] font-semibold">Rarity {payout.rarityFactor}×</span>
-                  <span className="text-[#13315c]/60"> × </span>
-                  <span className="text-[#0b2545] font-semibold">Risk {payout.riskFactor}×</span>
-                </div>
-                <div className="mt-2 pt-2 border-t border-[#8da9c4]/30 flex items-center justify-between">
-                  <span className="text-xs text-[#13315c]/70">Capped Range:</span>
-                  <span className="text-xs font-bold text-[#134074]">₹{payout.cap.min}–₹{payout.cap.max}</span>
-                </div>
-              </div>
             </div>
-
-            {/* Footer Section */}
-            <div className="bg-[#8da9c4]/10 px-5 py-3 border-t border-[#8da9c4]/30">
-              <div className="grid grid-cols-2 gap-3 mb-2">
-                <div>
-                  <p className="text-xs text-[#13315c]/70 font-medium mb-0.5">Payout ID</p>
-                  <p className="text-xs font-mono text-[#0b2545]">{payout.id}</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-xs text-[#13315c]/70 font-medium mb-0.5">UPI Reference</p>
-                  <p className="text-xs font-mono text-[#0b2545]">{payout.upiRef}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
 
       {/* How It Works Section */}
@@ -342,7 +360,7 @@ return()=>clearInterval(interval);
         </div>
       </div>
 
-      {/* Payout Breakdown */}
+      {/* Coverage Breakdown */}
       <div className="px-6 mb-6">
         <h2 className="text-lg font-bold text-[#0b2545] mb-3">Coverage Breakdown</h2>
         <div className="bg-[#eef4ed] rounded-2xl border border-[#8da9c4]/40 p-5">

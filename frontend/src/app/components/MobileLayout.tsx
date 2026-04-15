@@ -1,70 +1,57 @@
-import { Home, TrendingUp, Wallet, FileText, User,ClipboardList } from 'lucide-react';
+import { Home as HomeIcon, TrendingUp, Wallet, FileText, User, ClipboardList } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 
-interface MobileLayoutProps {
-  children: React.ReactNode;
-}
-
-export function MobileLayout({ children }: MobileLayoutProps) {
+export function MobileLayout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
 
   const navItems = [
-    { path: '/', icon: Home, label: 'Home' },
+    { path: '/', icon: HomeIcon, label: 'Home' },
     { path: '/forecast', icon: TrendingUp, label: 'Forecast' },
     { path: '/payouts', icon: Wallet, label: 'Payouts' },
-    {path:"/claims",icon:ClipboardList,label:'Claims'},
+    { path: '/claims', icon: ClipboardList, label: 'Claims' },
     { path: '/policy', icon: FileText, label: 'Policy' },
-    { path: '/profile', icon: User, label: 'Profile' }
+    { path: '/profile', icon: User, label: 'Profile' },
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[#e5e7eb] flex items-center justify-center p-4">
       
-      <div
-        className="w-full max-w-md mx-auto bg-white shadow-2xl relative "
-        style={{ height: '100vh', maxHeight: '844px' }}
-      >
-        {/* Main Content */}
-        <main className="h-full pb-20 overflow-y-auto">
-          {children}
+      {/* 📱 COMPACT CONTAINER (GigKavach Edition) */}
+      <div className="relative flex flex-col overflow-hidden bg-white w-[300px] h-[520px] rounded-[24px] shadow-2xl border-[6px] border-[#13315C]/5">
+        
+        {/* 📜 CONTENT AREA */}
+        <main className="flex-1 overflow-y-auto bg-[#F8FAFC] scrollbar-hide pb-20">
+          <div style={{ zoom: '0.60', transformOrigin: 'top center' }}>
+            {children}
+          </div>
         </main>
 
-        {/* Bottom Navigation */}
-        <nav className="fixed bottom-0 left-0 right-0 w-full max-w-md mx-auto bg-white/95 backdrop-blur-xl border-t border-gray-200 z-50 shadow-lg">
-          <div className="grid grid-cols-6 h-20 px-2">
+        {/* 🔻 PREMIUM BOTTOM NAV */}
+        <nav className="absolute bottom-0 w-full bg-white/90 backdrop-blur-md border-t border-slate-100 px-1 pt-2 pb-3 z-50">
+          <div className="grid grid-cols-6 items-center h-10">
             {navItems.map((item) => {
-              const Icon = item.icon;
               const isActive = location.pathname === item.path;
+              const Icon = item.icon;
 
               return (
                 <Link
                   key={item.path}
                   to={item.path}
-                  className="relative flex flex-col items-center justify-center gap-1 group"
+                  className="flex flex-col items-center justify-center transition-all active:scale-90"
                 >
-                  {/* Active indicator */}
-                  {isActive && (
-                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-12 h-1 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full"></div>
-                  )}
-
                   <div
-                    className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-all ${
+                    className={`flex items-center justify-center w-8 h-8 rounded-xl transition-all duration-300 ${
                       isActive
-                        ? 'bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg shadow-indigo-500/30 scale-105'
-                        : 'bg-gray-100 group-hover:bg-gray-200'
+                        ? 'bg-[#13315C] text-white shadow-lg'
+                        : 'text-slate-400'
                     }`}
                   >
-                    <Icon
-                      className={`w-5 h-5 ${
-                        isActive ? 'text-white' : 'text-gray-600'
-                      }`}
-                      strokeWidth={2.5}
-                    />
+                    <Icon size={14} strokeWidth={isActive ? 3 : 2} />
                   </div>
 
                   <span
-                    className={`text-xs font-medium ${
-                      isActive ? 'text-indigo-600' : 'text-gray-500'
+                    className={`text-[7px] mt-1 font-black uppercase tracking-tighter ${
+                      isActive ? 'text-[#13315C]' : 'text-slate-400'
                     }`}
                   >
                     {item.label}
@@ -74,7 +61,6 @@ export function MobileLayout({ children }: MobileLayoutProps) {
             })}
           </div>
         </nav>
-
       </div>
     </div>
   );

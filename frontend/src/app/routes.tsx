@@ -1,126 +1,109 @@
-// import { createBrowserRouter, Navigate } from "react-router-dom";
-// import { Home } from "./pages/Home";
-// import { Forecast } from "./pages/Forecast";
-// import { Payouts } from "./pages/Payouts";
-// import { Policy } from "./pages/Policy";
-// import { Profile } from "./pages/Profile";
-// import { PremiumSelection } from "./pages/PremiumSelection";
-// import { Auth } from "./pages/Auth";
-// import { Login } from "./pages/Login";
-
-// export const router = createBrowserRouter([
-//   {
-//     path: "/Login",
-//     element: <Login />,
-//   },
-//   {
-//     path: "/",
-//     element: <Home />,
-//   },
-//   {
-//     path: "/forecast",
-//     element: <Forecast />,
-//   },
-//   {
-//     path: "/payouts",
-//     element: <Payouts />,
-//   },
-//   {
-//     path: "/policy",
-//     element: <Policy />,
-//   },
-//   {
-//     path: "/profile",
-//     element: <Profile />,
-//   },
-//   {
-//     path: "/premium",
-//     element: <PremiumSelection />,
-//   },
-//   {
-//     path: "/Auth",
-//     element: <Auth/>,
-//   },
-//   {
-//     path: "/Login",
-//     element: <Login />,
-//   },
-//   // Optional: Redirect any unknown path to login
-//   {
-//     path: "*",
-//     element: <Navigate to="/Login" replace />,
-//   },
-// ]);
-import AdminDashboard from './pages/AdminDashboard'; 
 import { createBrowserRouter, Navigate } from "react-router-dom";
+import AdminDashboard from "./pages/AdminDashboard";
 import { Home } from "./pages/Home";
 import { Forecast } from "./pages/Forecast";
 import { Payouts } from "./pages/Payouts";
 import { Policy } from "./pages/Policy";
 import { Profile } from "./pages/Profile";
 import { PremiumSelection } from "./pages/PremiumSelection";
-import { Auth,RequireAuth } from "./pages/Auth";
+import { Auth } from "./pages/Auth";
 import { Signup } from "./pages/Signup";
-import {Login} from "./pages/Login";
-import  { Help }  from "./pages/Help";
-import {Claims} from "./pages/Claims";
+import { Login } from "./pages/Login";
+import { Help } from "./pages/Help";
+import { Claims } from "./pages/Claims";
+import { ProtectedRoute } from "./ProtectedRoute";
+
 export const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <Navigate to="/home" replace />,
+  },
   {
     path: "/login",
     element: <Login />,
   },
   {
-    path:"/signup",
-    element:<Signup/>,
-  },
-  {
-    path:"/claims",
-    element:<Claims/>,
-  },
-  {
-    path: "/",
-    element:(<RequireAuth>
-        <Home />
-      </RequireAuth>
-    ),
-  },
-  {
-    path: "/forecast",
-    element: <Forecast />,
-  },
-  {
-    path: "/payouts",
-    element: <Payouts />,
-  },
-  {
-    path: "/policy",
-    element: <Policy />,
-  },
-  {
-    path: "/profile",
-    element: (<RequireAuth>
-        <Profile />
-      </RequireAuth>
-    ),
-  },
-  {
-    path: "/premium",
-    element: <PremiumSelection />,
+    path: "/signup",
+    element: <Signup />,
   },
   {
     path: "/auth",
     element: <Auth />,
   },
   {
-    path: "*",
-    element: <Navigate to="/login" replace />,
+    path: "/premium",
+    element: (
+      <ProtectedRoute>
+        <PremiumSelection />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/home",
+    element: (
+      <ProtectedRoute>
+        <Home />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/claims",
+    element: (
+      <ProtectedRoute>
+        <Claims />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/profile",
+    element: (
+      <ProtectedRoute>
+        <Profile />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/policy",
+    element: (
+      <ProtectedRoute>
+        <Policy />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/forecast",
+    element: (
+      <ProtectedRoute>
+        <Forecast />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/payouts",
+    element: (
+      <ProtectedRoute>
+        <Payouts />
+      </ProtectedRoute>
+    ),
   },
   {
     path: "/help",
-    element: <Help />,
+    element: (
+      <ProtectedRoute>
+        <Help />
+      </ProtectedRoute>
+    ),
   },
   {
-  path: "/admin",
-  element: <AdminDashboard />,
+    path: "/admin",
+    element: (
+      <ProtectedRoute>
+        <AdminDashboard />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "*",
+    element: <Navigate to="/home" replace />,
   },
 ]);
