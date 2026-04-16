@@ -1,7 +1,8 @@
 import { MobileLayout } from '../components/MobileLayout';
 import {
   Shield, User, Phone, Wallet, Calendar,
-  CheckCircle, AlertCircle, Lock, FileText, Fingerprint, LogOut, RefreshCw, ArrowRight
+  CheckCircle, AlertCircle, Lock, FileText, Fingerprint, LogOut, RefreshCw, ArrowRight,
+  HeadphonesIcon, ChevronRight        // <-- new icons for Help card
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -212,7 +213,7 @@ export function Profile() {
               </p>
             </div>
 
-            {/* ✅ Show Complete KYC button if not verified */}
+            {/* Show Complete KYC button if not verified */}
             {!user.kycVerified && (
               <button
                 onClick={goToKYC}
@@ -258,6 +259,25 @@ export function Profile() {
             </div>
           </div>
         )}
+
+        {/* NEW: Help & Support Card - Navigates to Help page */}
+        <div
+          onClick={() => navigate('/help')}
+          className="bg-white rounded-2xl shadow-lg border border-[#8da9c4]/40 overflow-hidden cursor-pointer hover:shadow-xl transition"
+        >
+          <div className="bg-gradient-to-r from-[#134074]/10 to-[#13315c]/10 px-5 py-4 border-b border-[#8da9c4]/30 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <HeadphonesIcon className="w-5 h-5 text-[#134074]" strokeWidth={2.5} />
+              <h2 className="font-bold text-[#0b2545]">Help & Support</h2>
+            </div>
+            <ChevronRight className="w-5 h-5 text-[#8da9c4]" />
+          </div>
+          <div className="p-5">
+            <p className="text-sm text-[#13315c]/70">
+              Get assistance with policies, claims, KYC, and more. Chat with our AI assistant or contact support.
+            </p>
+          </div>
+        </div>
       </div>
     </MobileLayout>
   );
