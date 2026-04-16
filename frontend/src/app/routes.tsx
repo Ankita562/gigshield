@@ -12,6 +12,7 @@ import { Login } from "./pages/Login";
 import { Help } from "./pages/Help";
 import { Claims } from "./pages/Claims";
 import { ProtectedRoute } from "./ProtectedRoute";
+import { IdentityVerification } from "./pages/IdentityVerification";
 
 export const router = createBrowserRouter([
   {
@@ -46,6 +47,14 @@ export const router = createBrowserRouter([
       </ProtectedRoute>
     ),
   },
+  {
+  path: "/verify-identity",
+  element: (
+    <ProtectedRoute>
+      <IdentityVerification />
+    </ProtectedRoute>
+  ),
+},
   {
     path: "/claims",
     element: (

@@ -15,10 +15,15 @@ const userSchema = new mongoose.Schema({
     rain: { type: Number, default: null },
     aqi: { type: Number, default: null },
     dailyPayout: { type: Number, default: null }
-  },
+  },  // <-- close planThresholds object
   activePolicyId: { type: mongoose.Schema.Types.ObjectId, ref: "Policy" },
   subscriptionStartDate: { type: Date, default: null },
-  subscriptionEndDate: { type: Date, default: null }
+  subscriptionEndDate: { type: Date, default: null },
+  // ✅ KYC fields – correct placement (root level)
+  kycVerified: { type: Boolean, default: false },
+  aadhaarMasked: { type: String, default: null },
+  panMasked: { type: String, default: null },
+  kycVerifiedAt: { type: Date, default: null }
 }, { timestamps: true });
 
 export default mongoose.model("User", userSchema);

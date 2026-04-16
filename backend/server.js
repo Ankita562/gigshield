@@ -15,6 +15,7 @@ import claimRoutes from "./routes/claim.js";
 import forecastRoutes from "./routes/forecast.js";
 import paymentRoutes from "./routes/payments.js";
 import { runConsensusEngine } from "./services/weatherService.js";
+import kycRoutes from "./routes/kyc.js";
 
 const app = express();
 
@@ -32,21 +33,22 @@ requiredEnv.forEach((key) => {
   }
 });
 
+// ========== MIDDLEWARE (ORDER MATTERS!) ==========
 app.use(
   cors({
     origin: ["http://localhost:5173", "http://localhost:5174"],
     credentials: true,
   })
 );
+app.use(express.json());   // ✅ MUST be before any route that reads JSON body
 
-app.use(express.json());
-
-// PUBLIC ROUTES
+// ========== PUBLIC ROUTES ==========
+app.use("/api/user", kycRoutes);       // KYC route (needs JSON parser)
 app.use("/api/forecast", forecastRoutes);
 app.use("/api/trigger-claim", claimRoutes);
 app.use("/api/payments", paymentRoutes);
 
-// LOGIN (returns plan fields)
+// ========== LOGIN (public, returns plan fields & KYC masked data) ==========
 app.post("/api/login", async (req, res) => {
   try {
     const { phone } = req.body;
@@ -55,7 +57,6 @@ app.post("/api/login", async (req, res) => {
       return res.status(400).json({ message: "Phone is required" });
     }
 
-    // Populate the active policy if needed (optional)
     const user = await User.findOne({ phone }).populate("activePolicyId");
 
     if (!user) {
@@ -71,7 +72,6 @@ app.post("/api/login", async (req, res) => {
       { expiresIn: "7d" }
     );
 
-    // Build user response with plan fields
     const userResponse = {
       _id: user._id,
       name: user.name,
@@ -81,6 +81,10 @@ app.post("/api/login", async (req, res) => {
       planType: user.planType,
       planPrice: user.planPrice,
       planThresholds: user.planThresholds,
+      kycVerified: user.kycVerified,
+      aadhaarMasked: user.aadhaarMasked,   // ✅ added
+      panMasked: user.panMasked,           // ✅ added
+      kycVerifiedAt: user.kycVerifiedAt,   // ✅ added
     };
 
     return res.json({
@@ -95,7 +99,7 @@ app.post("/api/login", async (req, res) => {
   }
 });
 
-// SIGNUP
+// ========== SIGNUP ==========
 app.post("/api/signup", async (req, res) => {
   try {
     const { name, nominee, phone, platform_id, upi_id } = req.body;
@@ -123,11 +127,11 @@ app.post("/api/signup", async (req, res) => {
   }
 });
 
-// PROTECTED ROUTES
+// ========== PROTECTED ROUTES (require auth) ==========
 app.use("/api/policies", authMiddleware, policyRoutes);
 app.use("/api/claims", authMiddleware, claimRoutes);
 
-// Optional: fetch user policy endpoint (fallback)
+// ========== FETCH USER POLICY (fallback) ==========
 app.get("/api/user/policy", authMiddleware, async (req, res) => {
   const user = await User.findById(req.user.id);
   if (!user || !user.hasActivePlan) {
@@ -143,12 +147,12 @@ app.get("/api/user/policy", authMiddleware, async (req, res) => {
   });
 });
 
-// TEST
+// ========== TEST ENDPOINT ==========
 app.get("/", (req, res) => {
   res.send("Backend running");
 });
 
-// Connect to MongoDB and start server
+// ========== CONNECT TO MONGODB AND START SERVER ==========
 mongoose.connect(process.env.MONGO_URI)
   .then(() => {
     console.log("✅ MongoDB Connected");
