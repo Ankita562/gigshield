@@ -70,6 +70,7 @@ export function Signup() {
     setIsSubmitting(true);
 
     try {
+      // 1. Signup
       const response = await fetch(`${API_BASE}/api/signup`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -88,13 +89,27 @@ export function Signup() {
         throw new Error(data.message || 'Signup failed');
       }
 
-      localStorage.setItem('gigshield_user', JSON.stringify(data.user));
+      // 2. Auto-login after signup (get JWT token)
+      const loginRes = await fetch(`${API_BASE}/api/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: formData.phone }),
+      });
+
+      const loginData = await loginRes.json();
+      if (!loginRes.ok) {
+        throw new Error(loginData.message || 'Auto-login failed');
+      }
+
+      // 3. Store user and token (critical for authentication)
+      localStorage.setItem('gigshield_user', JSON.stringify(loginData.user));
+      localStorage.setItem('token', loginData.token);
       localStorage.setItem('gigshield_policy', JSON.stringify({ isActive: false }));
 
       setSuccess(true);
 
       setTimeout(() => {
-        navigate('/premium');
+        navigate('/verify-identity');
       }, 1500);
     } catch (error: any) {
       setApiError(error.message || 'Signup failed. Please try again.');
@@ -112,13 +127,13 @@ export function Signup() {
             </div>
             <h2 className="text-lg font-bold text-[#0b2545] mb-2">Registration Successful!</h2>
             <p className="text-sm text-[#13315c] mb-3">
-              Your GigKavach account has been created successfully.
+              Your GigKavach account has been created.
             </p>
             <div className="bg-[#eef4ed] rounded-xl p-3 border border-[#8da9c4]/40">
               <p className="text-xs text-[#13315c]/70 mb-1">Welcome, {formData.name}</p>
-              <p className="text-[10px] text-[#13315c]/60">Redirecting to plan selection...</p>
+              <p className="text-[10px] text-[#13315c]/60">Redirecting to KYC verification...</p>
             </div>
-            <p className="text-xs text-[#13315c]/60 mt-3">Please wait...</p>
+            <p className="text-xs text-[#13315c]/60 mt-3">IRDAI mandates identity verification before policy purchase.</p>
           </div>
         </div>
       </MobileLayout>

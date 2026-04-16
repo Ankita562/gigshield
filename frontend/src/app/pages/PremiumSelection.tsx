@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { MobileLayout } from "../components/MobileLayout";
 import { useAuth } from "../../contexts/AuthContext";
+import { API_BASE } from "../../config";
 
 declare global {
   interface Window {
@@ -21,7 +22,15 @@ export function PremiumSelection() {
   const [paymentSuccess, setPaymentSuccess] = useState(false);
   const [subscribedPlan, setSubscribedPlan] = useState("");
 
-  // Plan data (matches code 2)
+  // ✅ KYC Guard – IRDAI compliance: redirect if not verified
+  useEffect(() => {
+    const kycVerified = localStorage.getItem("kycVerified");
+    if (kycVerified !== "true") {
+      navigate("/verify-identity", { replace: true });
+    }
+  }, [navigate]);
+
+  // Plan data
   const planData = {
     Basic: { price: 30, payout: 400, rain: 40, aqi: 300, name: "Basic Shield", popular: false, color: "from-[#8da9c4] to-[#134074]" },
     Standard: { price: 45, payout: 600, rain: 40, aqi: 300, name: "Standard Shield", popular: true, color: "from-[#134074] to-[#0b2545]" },
@@ -32,7 +41,7 @@ export function PremiumSelection() {
   const currentUser = authUser || JSON.parse(localStorage.getItem("gigshield_user") || "null");
   const currentToken = authToken || localStorage.getItem("token");
 
-  // Features mapping for UI
+  // Features mapping
   const getFeatures = (plan: PlanTier) => {
     const features = {
       Basic: [
@@ -102,42 +111,82 @@ export function PremiumSelection() {
   }, []);
 
   const handlePayment = async () => {
-    if (!currentUser || !currentToken) {
-      alert("Please login to continue");
+    const token = localStorage.getItem("token");
+    if (!token || token === "undefined" || token === "null") {
+      alert("Session expired. Please login again.");
       navigate("/login");
       return;
     }
-    if (!agreed) return;
+    if (!currentUser) {
+      navigate("/login");
+      return;
+    }
+    if (!agreed) {
+      alert("Please agree to the Terms & Conditions");
+      return;
+    }
     setIsProcessing(true);
 
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:5000";
-      const orderRes = await fetch(`${apiUrl}/api/payments/create-order`, {
+      // 1. Create order on backend
+      const orderRes = await fetch(`${API_BASE}/api/payments/create-order`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${currentToken}` },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({ amount: current.price * 100, planType: activeTab }),
       });
-      const orderData = await orderRes.json();
-      if (!orderRes.ok) throw new Error(orderData.message);
 
+      if (!orderRes.ok) {
+        const errorData = await orderRes.json();
+        if (orderRes.status === 401) {
+          localStorage.clear();
+          navigate("/login");
+          return;
+        }
+        throw new Error(errorData.message || "Order creation failed");
+      }
+
+      const orderData = await orderRes.json();
+      const razorpayKey = import.meta.env.VITE_RAZORPAY_KEY_ID;
+      if (!razorpayKey) {
+        throw new Error("Razorpay key not configured. Check your .env file.");
+      }
+
+      // 2. Open Razorpay checkout
       const options = {
-        key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+        key: razorpayKey,
         amount: orderData.amount,
         currency: "INR",
         name: "GigKavach",
         description: `${activeTab} Shield Activation`,
         order_id: orderData.orderId,
         theme: { color: "#13315C" },
-        prefill: { name: currentUser.name, contact: currentUser.phone },
+        prefill: {
+          name: currentUser.name,
+          contact: currentUser.phone,
+        },
         handler: async (response: any) => {
-          const verifyRes = await fetch(`${apiUrl}/api/payments/verify`, {
+          // 3. Verify payment on backend
+          const verifyRes = await fetch(`${API_BASE}/api/payments/verify`, {
             method: "POST",
-            headers: { "Content-Type": "application/json", Authorization: `Bearer ${currentToken}` },
-            body: JSON.stringify({ ...response, planType: activeTab, amount: current.price }),
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+            body: JSON.stringify({
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+              planType: activeTab,
+              amount: current.price,
+            }),
           });
+
           const verifyData = await verifyRes.json();
           if (verifyRes.ok && verifyData.success) {
-            // Store planType directly on user object (persistent)
+            // Update localStorage with new user data (includes plan)
             const existingUser = JSON.parse(localStorage.getItem("gigshield_user") || "{}");
             const updatedUser = {
               ...existingUser,
@@ -152,28 +201,31 @@ export function PremiumSelection() {
               },
             };
             localStorage.setItem("gigshield_user", JSON.stringify(updatedUser));
-            // Optional policy backup
-            const activePolicy = {
+            localStorage.setItem("gigshield_policy", JSON.stringify({
               isActive: true,
               planType: activeTab,
               amount: current.price,
               rainThreshold: current.rain,
               aqiThreshold: current.aqi,
               dailyPayout: current.payout,
-            };
-            localStorage.setItem("gigshield_policy", JSON.stringify(activePolicy));
+            }));
+
             setSubscribedPlan(activeTab);
             setPaymentSuccess(true);
           } else {
             throw new Error(verifyData.message || "Payment verification failed");
           }
         },
-        modal: { ondismiss: () => setIsProcessing(false) },
+        modal: {
+          ondismiss: () => setIsProcessing(false),
+        },
       };
+
       const rzp = new window.Razorpay(options);
       rzp.open();
     } catch (err: any) {
-      alert(err.message || "Payment failed");
+      console.error("Payment error:", err);
+      alert(`Payment failed: ${err.message}`);
       setIsProcessing(false);
     }
   };
@@ -208,7 +260,6 @@ export function PremiumSelection() {
 
   return (
     <MobileLayout>
-      {/* Header - unified gradient with blurred circles */}
       <div className="relative bg-gradient-to-br from-[#134074] via-[#13315c] to-[#0b2545] text-white px-6 pt-12 pb-20 overflow-hidden">
         <div className="absolute inset-0 opacity-10">
           <div className="absolute top-0 right-0 w-96 h-96 bg-[#8da9c4] rounded-full blur-3xl"></div>
@@ -225,7 +276,6 @@ export function PremiumSelection() {
         </div>
       </div>
 
-      {/* Plan Cards */}
       <div className="px-6 -mt-12 mb-6 space-y-4 relative z-20">
         {(["Basic", "Standard", "Premium"] as const).map((planKey) => {
           const plan = planData[planKey];
@@ -241,7 +291,6 @@ export function PremiumSelection() {
                   : 'shadow-lg hover:shadow-xl'
               }`}
             >
-              {/* Popular Badge */}
               {plan.popular && (
                 <div className="absolute top-4 right-4 z-10">
                   <div className="bg-gradient-to-r from-amber-400 to-amber-500 text-white px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1 shadow-lg">
@@ -251,7 +300,6 @@ export function PremiumSelection() {
                 </div>
               )}
 
-              {/* Card Header */}
               <div className={`bg-gradient-to-br ${plan.color} text-white p-6 pb-8`}>
                 <div className="flex items-start justify-between mb-4">
                   <div>
@@ -270,9 +318,7 @@ export function PremiumSelection() {
                 </div>
               </div>
 
-              {/* Card Body */}
               <div className="bg-[#eef4ed] p-6">
-                {/* Trigger Info */}
                 <div className="mb-5 bg-white/60 rounded-xl p-4 border border-[#8da9c4]/40">
                   <div className="flex items-center gap-2 mb-2">
                     <Zap className="w-4 h-4 text-[#134074]" strokeWidth={2.5} />
@@ -285,7 +331,6 @@ export function PremiumSelection() {
                   </div>
                 </div>
 
-                {/* Features List */}
                 <div className="space-y-3">
                   {features.map((feature, idx) => (
                     <div key={idx} className="flex items-start gap-3">
@@ -310,7 +355,6 @@ export function PremiumSelection() {
         })}
       </div>
 
-      {/* Benefits Section */}
       <div className="px-6 mb-6">
         <div className="bg-[#8da9c4]/20 rounded-2xl p-5 border border-[#8da9c4]/50">
           <div className="flex items-start gap-3">
@@ -342,7 +386,6 @@ export function PremiumSelection() {
         </div>
       </div>
 
-      {/* IRDAI Compliance Notice */}
       <div className="px-6 mb-6">
         <div className="bg-emerald-50 rounded-xl p-4 border border-emerald-200 flex items-start gap-3">
           <Shield className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" strokeWidth={2.5} />
@@ -355,7 +398,6 @@ export function PremiumSelection() {
         </div>
       </div>
 
-      {/* Terms & CTA - with clickable Terms & Conditions link */}
       <div className="px-6 space-y-4 mb-8">
         <label className="flex items-start gap-3 cursor-pointer bg-slate-100/50 p-4 rounded-2xl border border-slate-100">
           <input
@@ -400,7 +442,6 @@ export function PremiumSelection() {
         </p>
       </div>
 
-      {/* Free Look Period Notice */}
       <div className="px-6 mb-6">
         <div className="bg-amber-50 rounded-xl p-4 border border-amber-200 flex items-start gap-3">
           <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" strokeWidth={2.5} />
