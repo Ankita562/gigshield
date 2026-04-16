@@ -34,7 +34,7 @@ requiredEnv.forEach((key) => {
 
 app.use(
   cors({
-    origin: ["http://localhost:5173", "http://localhost:5174"],
+    origin: ["http://localhost:5173", "http://localhost:5174", "https://gigkavach-inky.vercel.app"],
     credentials: true,
   })
 );
