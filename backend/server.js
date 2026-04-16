@@ -40,7 +40,7 @@ app.use(
     credentials: true,
   })
 );
-app.use(express.json());   // ✅ MUST be before any route that reads JSON body
+app.use(express.json());   
 
 // ========== PUBLIC ROUTES ==========
 app.use("/api/user", kycRoutes);       // KYC route (needs JSON parser)
@@ -82,9 +82,9 @@ app.post("/api/login", async (req, res) => {
       planPrice: user.planPrice,
       planThresholds: user.planThresholds,
       kycVerified: user.kycVerified,
-      aadhaarMasked: user.aadhaarMasked,   // ✅ added
-      panMasked: user.panMasked,           // ✅ added
-      kycVerifiedAt: user.kycVerifiedAt,   // ✅ added
+      aadhaarMasked: user.aadhaarMasked,   
+      panMasked: user.panMasked,           
+      kycVerifiedAt: user.kycVerifiedAt,   
     };
 
     return res.json({
