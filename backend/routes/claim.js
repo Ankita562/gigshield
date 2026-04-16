@@ -1,115 +1,100 @@
-import express from "express";
-import Policy from "../models/Policy.js";
-import Claim from "../models/Claim.js";
-
+const express = require('express');
 const router = express.Router();
+const Claim = require('../models/Claim');
+const User = require('../models/User');
+const { sendClaimNotification } = require('../services/notifications');
+const { scoreClaim } = require('../services/fraudScorer');
+const { authMiddleware } = require('../middleware/auth');
 
-// User claim history
-// Final route: GET /api/claims/:userId
-router.get("/:userId", async (req, res) => {
-  try {
-    const claims = await Claim.find({ userId: req.params.userId }).sort({ createdAt: -1 });
-    res.json(claims);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
+router.post('/claims', authMiddleware, async (req, res) => {  try {
+    const worker = await User.findById(req.user.id);
+    const { claimType, amountInr, zone, hasPhoto, gpsCoords, deviceId } = req.body;
 
-// User dashboard / latest policy
-// Final route: GET /api/claims/dashboard/:userId
-router.get("/dashboard/:userId", async (req, res) => {
-  try {
-    const policy = await Policy.findOne({ userId: req.params.userId });
-    res.json(policy);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
+    // --- Compute telemetry ---
+    const now = Date.now();
+    const shiftStart = worker.shiftStartTime || now;
 
-// Internal weather-engine trigger
-// IMPORTANT:
-// If mounted with app.use("/api/trigger-claim", claimRoutes)
-// then this must be "/"
-router.post("/", async (req, res) => {
-  try {
-    const { userId, rainfall = 0, aqi = 0 } = req.body;
+    // Count how many accounts used this device today
+    const deviceAccountsToday = await Claim.countDocuments({
+      deviceId,
+      timestamp: { $gte: new Date(Date.now() - 86400000) }
+    });
 
-    if (!userId) {
-      return res.status(400).json({ message: "userId is required" });
-    }
+    // Count zone claims in last hour
+    const zoneClaimsLastHour = await Claim.countDocuments({
+      zone,
+      timestamp: { $gte: new Date(Date.now() - 3600000) }
+    });
 
-    const policy = await Policy.findOne({ userId });
+    // Count worker claims in last 30 days
+    const claimsLast30Days = await Claim.countDocuments({
+      workerId: req.user.id,
+      timestamp: { $gte: new Date(Date.now() - 30 * 86400000) }
+    });
 
-    if (!policy || policy.status !== "active") {
-      return res.status(400).json({ message: "No active policy" });
-    }
+    const telemetry = {
+      velocityKmh:          req.body.velocityKmh || 0,
+      deviceAccountsToday:  deviceAccountsToday + 1,
+      weatherMatchesClaim:  req.body.weatherMatchesClaim ?? true,
+      minsSinceShiftStart:  (now - shiftStart) / 60000,
+      zoneClaimsLastHour,
+    };
 
-    const lastClaim = await Claim.findOne({ userId }).sort({ createdAt: -1 });
+    const weather = {
+      rainfallMm: req.body.actualRainfallMm || 0,
+      aqi:        req.body.actualAqi || 50,
+      tempC:      req.body.actualTempC || 28,
+    };
 
-    if (lastClaim) {
-      const diff = (Date.now() - new Date(lastClaim.createdAt).getTime()) / (1000 * 60);
+    const workerProfile = {
+      daysSinceJoining:  Math.floor((now - new Date(worker.createdAt)) / 86400000),
+      claimsLast30Days,
+      age: worker.age || 25,
+    };
 
-      if (diff < 60) {
-        const rejected = await Claim.create({
-          userId,
-          amount: 0,
-          reason: "Cooldown active",
-          status: "rejected",
-        });
+    const result = await scoreClaim(
+  {
+    type: claimType,
+    amountInr,
+    zone,
+    hasPhoto,
+    claimedAqiSevere: false,
+    timestamp: Date.now()   // 🔥 ADD THIS
+  },
+  telemetry,
+  weather,
+  workerProfile
+);
+    // --- Save claim with fraud result ---
+    const claim = await Claim.create({
+      workerId:     req.user.id,
+      claimType,
+      amountInr,
+      zone,
+      hasPhoto,
+      timestamp:    new Date(),
+      fraudScore:   result.fraud_score,
+      fraudVerdict: result.verdict,
+      fraudFlags:   result.flags,
+      status:       result.verdict === 'approve' ? 'approved'
+                  : result.verdict === 'reject'  ? 'rejected'
+                  : 'under_review',
+    });
 
-        return res.json({
-          message: "Claim rejected ❌",
-          claim: rejected,
-        });
-      }
-    }
-
-    if (rainfall > 40) {
-      const base = 200;
-      const severityMultiplier = rainfall > 60 ? 2 : rainfall > 50 ? 1.5 : 1;
-      const variability = 0.8 + Math.random() * 0.4;
-      const calculated = Math.round(base * severityMultiplier * variability);
-      const payout = Math.min(Math.max(calculated, 150), 400);
-
-      const approved = await Claim.create({
-        userId,
-        amount: payout,
-        reason: "Heavy Rain",
-        status: "approved",
-      });
-
-      return res.json({
-        message: "Claim auto-approved 🎉",
-        claim: approved,
-      });
-    }
-
-    if (aqi > 300) {
-      const base = 200;
-      const severityMultiplier = aqi > 400 ? 2 : aqi > 350 ? 1.5 : 1;
-      const variability = 0.8 + Math.random() * 0.4;
-      const calculated = Math.round(base * severityMultiplier * variability);
-      const payout = Math.min(Math.max(calculated, 150), 400);
-
-      const approved = await Claim.create({
-        userId,
-        amount: payout,
-        reason: "High AQI",
-        status: "approved",
-      });
-
-      return res.json({
-        message: "Claim auto-approved 🎉",
-        claim: approved,
-      });
-    }
+    // --- Send notification ---
+    await sendClaimNotification(worker, claim, result);
 
     return res.json({
-      message: "No claim triggered",
+      status:      claim.status,
+      fraudScore:  result.fraud_score,
+      flags:       result.flags,
+      claimId:     claim._id,
     });
+
   } catch (err) {
+    console.error(err);
     res.status(500).json({ error: err.message });
   }
 });
 
-export default router;
+module.exports = router;

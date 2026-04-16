@@ -1,7 +1,7 @@
-import express from "express";
-import Policy from "../models/Policy.js";
-import mongoose from "mongoose";
-import Claim from "../models/Claim.js";
+const express = require('express');
+const Policy = require('../models/Policy');
+const Claim = require('../models/Claim');
+
 const router = express.Router();
 
 router.post("/policy/buy", async (req, res) => {
@@ -26,18 +26,18 @@ router.post("/policy/buy", async (req, res) => {
 });
 
 router.get("/dashboard/:userId", async (req, res) => {
-  const policy = await Policy.findOne({ userId:req.params.userId });
-   if (!policy) {
+  const policy = await Policy.findOne({ userId: req.params.userId });
+  if (!policy) {
     return res.status(404).json({ message: "No policy found" });
   }
 
-  // 🔥 dynamic weather (for demo)
   const todayWeather = {
     rainfall: Math.floor(Math.random() * 50),
     aqi: Math.floor(Math.random() * 300),
     temp: 25 + Math.floor(Math.random() * 10)
   };
-  res.json({...policy._doc,weeklyPremium:policy.premium,todayWeather});
+
+  res.json({ ...policy._doc, weeklyPremium: policy.premium, todayWeather });
 });
 
-export default router;
+module.exports = router;
