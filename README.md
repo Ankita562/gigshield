@@ -494,4 +494,4 @@ Once all three services are running, open `http://localhost:5173/admin` in your 
 ---
 
 *GigKavach — Parametric income protection for Bharat's invisible workforce.*
-*Guidewire DEVTrails 2026 — Phase 2 Submission*
+*Guidewire DEVTrails 2026 — Phase 3 Submission*
