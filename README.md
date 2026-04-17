@@ -7,6 +7,7 @@ Guidewire DEVTrails 2026 — Phase 3 Submission
 **Pitch Video:** https://youtu.be/j6rNZdCNBcA?si=FwpY-TAH-8BOvIh8
 > 🚨 **Market Crash Response included — Section 8: Adversarial Defense & Anti-Spoofing Strategy**
 
+**Pitch Deck:** [View the GigKavach Pitch Deck Here](https://drive.google.com/drive/folders/1YHqqsMoPkd6T40xFtQzn6lXVBJZ8Z5hc?usp=sharing).
 ---
 
 ## Table of Contents
