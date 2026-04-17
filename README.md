@@ -1,6 +1,6 @@
 # GigKavach 🛡️
 **AI-Powered Parametric Income Protection for India's Food Delivery Partners**
-Guidewire DEVTrails 2026 — Phase 2 Submission
+Guidewire DEVTrails 2026 — Phase 3 Submission
 
 **Team:** VisionCoders | BMS College of Engineering
 
@@ -78,20 +78,35 @@ flowchart TD
 sequenceDiagram
     participant W as 🛵 Worker
     participant S as GigKavach System
+    participant KYC as Identity Engine
     participant API as External APIs
     participant AI as AI Service
     participant UPI as Razorpay UPI
 
-    W->>S: Policy active (₹30/week paid)
+    %% ONBOARDING & KYC FLOW
+    Note over W, UPI: Phase 1: Onboarding & KYC
+    W->>S: Login (OTP) & Signup Details
+    S->>KYC: Ping Aadhaar/PAN Verification
+    KYC-->>S: Verified & Masked Data
+    W->>S: Select Plan (Basic/Standard/Premium)
+    S->>UPI: Process Payment via Razorpay
+    UPI-->>S: Payment Success
+    S-->>W: Policy Active (UIN Generated)
+
+    %% ZERO-TOUCH CLAIM FLOW
+    Note over W, UPI: Phase 2: Zero-Touch Claim Monitoring
     loop Every 15–60 minutes
         S->>API: Poll weather / AQI / platform
         API-->>S: Data returned
     end
+    
     S->>S: Threshold breached — Rain 42mm/hr
     S->>API: Confirm with second source (IMD)
     API-->>S: Confirmed
+    
     S->>AI: Run fraud check on worker
     AI-->>S: Score 32 — clean
+    
     S->>UPI: Initiate payout ₹200
     UPI-->>W: ₹200 credited to UPI wallet
     S->>W: WhatsApp alert — Payout processed
@@ -316,6 +331,7 @@ flowchart LR
 | CIS before payment | Coverage summary shown before every UPI deduction |
 | Grievance SLA (15 days) | Auto-escalation triggered at day 13 |
 | Claim settlement | Parametric = payout in under 5 minutes. Rule destroyed. |
+| Pre-Insurance KYC (AML guidelines) | Mandatory Aadhaar/PAN masking and verification step required before a worker is permitted to purchase any premium tier. |
 
 **Inspector Dashboard:** A dedicated admin view showing every policy, payout, API trigger, and grievance with full audit trail — built specifically for IRDAI auditors.
 
@@ -333,6 +349,8 @@ flowchart LR
 | Weather (Live Demo) | Open-Meteo (No-key fallback for live hackathon demo) |
 | Weather (Enterprise) | Weather Union API (Zomato) + IMD via indianapi.in |
 | Deploy | Vercel (Admin Dashboard), Render (Backend) |
+| Identity & KYC | Express Middleware + Data Masking Utilities |
+| Notification Engine | Node.js Asynchronous Event Emitters |
 
 > *Note: Full Aadhaar OCR (Tesseract.js) and Liveness Checks are mapped out for Phase 3 enterprise compliance but bypassed in the current demo for speed.*
 
@@ -414,7 +432,7 @@ Once all three services are running, open `http://localhost:5173/admin` in your 
 |---|---|---|---|
 | Seed | 1–2 | ✅ Complete | README, pitch video, architecture |
 | Scale | 3–4 | ✅ Complete | React Native app, backend, trigger engine, premium model, Razorpay |
-| Soar | 5–6 | 🔄 In Progress | Fraud model, Inspector dashboard, final demo video |
+| Soar | 5–6 | ✅ Complete | Fraud model, Inspector dashboard, final demo video |
 
 **Demo Day scenario:** Live rain trigger fires for Bengaluru PIN 560034 → GPS validated → cross-signal corroboration passes → fraud check clean → UPI payout in under 5 minutes → Inspector dashboard shows full audit trail.
 
