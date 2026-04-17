@@ -185,6 +185,33 @@ through three layered mechanisms:
 | Platform Outage | Downtime > 2 hours | Downdetector |
 | Flood / Cyclone | Govt alert issued | NDMA / data.gov.in |
 
+### 7.1 Multi-Node Consensus & Zone Mapping
+
+GigKavach does not rely on city-wide averages. Triggers are executed via a
+Triple-Node Consensus Engine mapped to specific operational zones.
+
+| Component | How it works |
+|---|---|
+| **Zone-Map Anchor** | Automated triggers are only valid within defined high-density delivery hubs — Koramangala, HSR Layout, Indiranagar, and surrounding PIN codes. City-wide averages do not fire payouts. |
+| **Dual-Verification** | A payout only fires if the worker's GPS telemetry (Sentinel Engine) places them within a zone where at least two independent weather nodes confirm a threshold breach simultaneously. |
+
+```mermaid
+flowchart LR
+    A[Worker GPS\nSentinel Engine] --> C{Worker inside\nregistered zone?}
+    B[Triple-Node\nConsensus Engine] --> D{2 of 3 nodes\nconfirm breach?}
+    C -- No --> Z[❌ Payout blocked]
+    C -- Yes --> D
+    D -- No --> Z
+    D -- Yes --> E[✅ Loss Event Declared]
+
+    style Z fill:#ea4335,color:#fff
+    style E fill:#34a853,color:#fff
+```
+
+> This means a worker standing outside their registered zone during a storm
+> receives no payout — and a storm confirmed by only one node fires nothing.
+> Both conditions must be true simultaneously.
+
 Every trigger requires **two independent sources** to confirm before a payout fires.
 
 ---
@@ -247,6 +274,8 @@ When a payout is triggered, we do not just check **where the worker says they ar
 A genuine worker in Koramangala during a flood will pass all six checks naturally. A fraud bot faking GPS from a different city will fail at least two or three — IP geolocation, cell tower, and platform activity will all contradict the spoofed GPS.
 
 **Rule:** Any claim where 2 or more signals contradict the GPS → auto-hold + fraud queue.
+
+**Sentinel ML Scorer:** The corroboration logic is powered by a Random Forest / XGBoost model (Sentinel Engine). By analyzing the non-linear relationships between velocity, device history, and multi-node weather consensus, Sentinel generates a probabilistic Fraud Score. Claims with a score $> 0.75$ are immediately neutralized, protecting the actuarial pool from rapid depletion.
 
 ---
 
