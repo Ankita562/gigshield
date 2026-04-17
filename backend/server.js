@@ -1,21 +1,20 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const cors = require('cors');
-const dotenv = require('dotenv');
-const dns = require('dns');
-const jwt = require('jsonwebtoken');
+import "dotenv/config";
+import express from "express";
+import mongoose from "mongoose";
+import cors from "cors";
+import dns from "node:dns";
+import jwt from "jsonwebtoken";
 
-dns.setServers(['8.8.8.8', '8.8.4.4']);
-dotenv.config();
+dns.setServers(["8.8.8.8", "8.8.4.4"]);
 
-const User = require('./models/User');
-const { authMiddleware } = require('./middleware/auth');
-const policyRoutes = require('./routes/policy');
-const claimRoutes = require('./routes/claim');
-const forecastRoutes = require('./routes/forecast');
-const paymentRoutes = require('./routes/payments');
-const kycRoutes = require('./routes/kyc');
-
+import User from "./models/User.js";
+import { authMiddleware } from './middleware/auth.js';
+import policyRoutes from './routes/policy.js';
+import claimRoutes from './routes/claim.js';
+import forecastRoutes from './routes/forecast.js';
+import paymentRoutes from './routes/payments.js';
+import kycRoutes from './routes/kyc.js';
+import { runConsensusEngine } from "./services/weatherService.js";
 const app = express();
 
 const requiredEnv = ['MONGO_URI', 'RAZORPAY_KEY_ID', 'RAZORPAY_KEY_SECRET', 'JWT_SECRET'];
@@ -102,7 +101,7 @@ app.post('/api/signup', async (req, res) => {
   }
 });
 
-app.use('/api/policies', authMiddleware, policyRoutes);
+app.use('/api/policy', authMiddleware, policyRoutes);
 app.use('/api/claims', authMiddleware, claimRoutes);
 
 app.get('/api/user/policy', authMiddleware, async (req, res) => {
@@ -118,7 +117,91 @@ app.get('/api/user/policy', authMiddleware, async (req, res) => {
   });
 });
 
-app.get('/', (req, res) => res.send('Backend running'));
+// ========== ADMIN & ENGINE ROUTES (For the Dashboard) ==========
+
+// 1. Feed the Actuarial Pool Health data
+// 1. Feed the Actuarial Pool Health data
+app.get("/api/admin/stats", async (req, res) => {
+  try {
+    const users = await User.find({ hasActivePlan: true });
+    
+    let totalPremium = 0;
+    let maxExposure = 0;
+    
+    users.forEach(u => {
+      totalPremium += (u.planPrice || 0);
+      if (u.planType === 'Premium') maxExposure += 1000;
+      else if (u.planType === 'Standard') maxExposure += 600;
+      else maxExposure += 400; 
+    });
+
+    // Send the exact structure your new TypeScript interface expects!
+    res.json({
+      activePolicies: users.length,
+      premiumPool: totalPremium,
+      maxExposure: maxExposure,
+      lossRatio: 12.5, // Hardcoded safe number for the demo
+      
+      // Data for your Recharts BarChart
+      weeklyData: [
+        { name: 'Mon', claims: 4 },
+        { name: 'Tue', claims: 12 },
+        { name: 'Wed', claims: 8 },
+        { name: 'Thu', claims: 35 }, // Simulate a storm hit here!
+        { name: 'Fri', claims: 15 },
+        { name: 'Sat', claims: 5 },
+        { name: 'Sun', claims: 2 }
+      ],
+      
+      // Data for your Claims Summary Card
+      claimsSummary: { 
+        triggered: 81, 
+        paid: 32400, 
+        approved: 78, 
+        flagged: 3 
+      },
+      
+      // Data for your Zone Risk Heat Table
+      zoneRisk: [
+        { name: 'Koramangala', risk: 'High', policies: Math.floor(users.length * 0.4) },
+        { name: 'HSR Layout', risk: 'Medium', policies: Math.floor(users.length * 0.35) },
+        { name: 'Indiranagar', risk: 'Low', policies: Math.floor(users.length * 0.25) }
+      ],
+
+      // Data for your Live Fraud Engine Decisions
+      fraudAlerts: [
+        { claimId: 'CLM-8921', score: 88, status: 'Flagged', reasons: ['Speed > 65km/h', 'Device ID Mismatch'] },
+        { claimId: 'CLM-8922', score: 12, status: 'Clean', reasons: ['Verified Rain', 'Consistent GPS'] },
+        { claimId: 'CLM-8923', score: 95, status: 'Flagged', reasons: ['3 Claims in 30 Days', 'No Photo Evidence'] }
+      ]
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Failed to fetch stats" });
+  }
+});
+
+app.get("/api/weather/check", async (req, res) => {
+  try {
+    const mode = req.query.mode || 'live'; 
+    console.log(`⚡ Admin manually triggered the Engine in ${mode.toUpperCase()} mode!`);
+    const result = await runConsensusEngine(mode); 
+    
+    res.json({
+      message: "Engine cycle complete",
+      payout: result.payout,
+      details: result
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Engine failed to run" });
+  }
+});
+
+// ========== TEST ENDPOINT ==========
+app.get("/", (req, res) => {
+  res.send("Backend running");
+});
 
 mongoose.connect(process.env.MONGO_URI)
   .then(() => {

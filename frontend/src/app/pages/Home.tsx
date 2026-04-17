@@ -64,10 +64,19 @@ export function Home() {
     }
 
     const userId = user._id || user.id;
+    // 1. Grab the token from local storage
+    const token = localStorage.getItem('token');
 
     const fetchData = async () => {
       try {
-        const res = await fetch(`${API_BASE}/api/dashboard/${userId}`);
+        // 2. Add /policy/ to the URL AND pass the token in the headers!
+        const res = await fetch(`${API_BASE}/api/policy/dashboard/${userId}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        
         if (!res.ok) throw new Error('Failed to fetch dashboard');
         const data = await res.json();
         setPolicy(data);

@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from "mongoose";
 
 const ClaimSchema = new mongoose.Schema({
   workerId:         { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
@@ -13,4 +13,5 @@ const ClaimSchema = new mongoose.Schema({
   status:           { type: String, enum: ['approved','under_review','rejected'], default: 'under_review' },
 });
 
-module.exports = mongoose.model('Claim', ClaimSchema);
+const Claim = mongoose.model('Claim', ClaimSchema);
+export default Claim;

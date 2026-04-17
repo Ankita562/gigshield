@@ -1,9 +1,9 @@
-const express = require('express');
-const crypto = require('crypto');
-const Razorpay = require('razorpay');
-const Policy = require('../models/Policy');
-const User = require('../models/User');
-const { authMiddleware } = require('../middleware/auth');
+import express from 'express';
+import crypto from'crypto';
+import Razorpay from'razorpay';
+import Policy from'../models/Policy.js';
+import User from'../models/User.js';
+import { authMiddleware } from '../middleware/auth.js';
 
 const router = express.Router();
 
@@ -49,12 +49,15 @@ router.post('/create-order', authMiddleware, async (req, res) => {
 
 router.post('/verify', authMiddleware, async (req, res) => {
   try {
-    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, planType, amount } = req.body;
+    let { razorpay_order_id, razorpay_payment_id, razorpay_signature, planType, amount } = req.body;
     const userId = req.user.id;
 
     if (!process.env.RAZORPAY_KEY_SECRET)
       return res.status(500).json({ success: false, message: 'Razorpay secret missing' });
 
+    if (planType) {
+        planType = planType.charAt(0).toUpperCase() + planType.slice(1).toLowerCase();
+    }
     const body = `${razorpay_order_id}|${razorpay_payment_id}`;
     const expectedSignature = crypto
       .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
@@ -70,6 +73,7 @@ router.post('/verify', authMiddleware, async (req, res) => {
 
     const policy = new Policy({
       userId, planType, amount,
+      zone: 'Koramangala',
       razorpayOrderId: razorpay_order_id,
       razorpayPaymentId: razorpay_payment_id,
       startDate, endDate, status: 'active',
@@ -112,4 +116,4 @@ router.post('/verify', authMiddleware, async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

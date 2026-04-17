@@ -1,5 +1,5 @@
 """
-GigShield — Fraud Scoring API
+GigKavach — Fraud Scoring API
 Run: uvicorn fraud_service:app --host 0.0.0.0 --port 8000
 """
 

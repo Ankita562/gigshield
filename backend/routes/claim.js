@@ -1,10 +1,48 @@
-const express = require('express');
+import express from 'express';
+import Claim from '../models/Claim.js';
+import User from '../models/User.js';
+import { sendClaimNotification } from '../services/notifications.js';
+import { scoreClaim } from '../services/fraudScorer.js';
+import { authMiddleware } from '../middleware/auth.js';
+ 
 const router = express.Router();
-const Claim = require('../models/Claim');
-const User = require('../models/User');
-const { sendClaimNotification } = require('../services/notifications');
-const { scoreClaim } = require('../services/fraudScorer');
-const { authMiddleware } = require('../middleware/auth');
+// 🚨 INTERNAL AUTOMATED ENGINE ROUTE (No Auth Needed) 🚨
+router.post('/', async (req, res) => {
+  try {
+    // The engine sends the workerId directly in the body
+    const { workerId, claimType, amountInr, zone } = req.body;
+    const worker = await User.findById(workerId);
+
+    if (!worker) return res.status(404).json({ error: "Worker not found" });
+
+    // Auto-approve the claim since it comes from our trusted Triple-Node engine
+    const claim = await Claim.create({
+      workerId,
+      claimType: claimType || 'parametric_weather',
+      amountInr,
+      zone: zone || 'Bengaluru',
+      timestamp: new Date(),
+      fraudScore: 0,
+      fraudVerdict: 'approve',
+      fraudFlags: ['Triple-Node Consensus Verified'],
+      status: 'approved'
+    });
+
+    worker.walletBalance = (worker.walletBalance || 0) + amountInr;
+    // Fire the new notification system!
+    // Fire the new notification system safely!
+    try {
+      await sendClaimNotification(worker, claim, { verdict: 'approve' });
+    } catch (smsError) {
+      console.log("⚠️ Twilio limit reached: SMS skipped, but Payout is still successful!");
+    }
+
+    return res.json({ status: 'approved', claimId: claim._id });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message });
+  }
+});
 
 router.post('/claims', authMiddleware, async (req, res) => {  try {
     const worker = await User.findById(req.user.id);
@@ -59,7 +97,7 @@ router.post('/claims', authMiddleware, async (req, res) => {  try {
     zone,
     hasPhoto,
     claimedAqiSevere: false,
-    timestamp: Date.now()   // 🔥 ADD THIS
+    timestamp: Date.now()   // 
   },
   telemetry,
   weather,
@@ -97,4 +135,18 @@ router.post('/claims', authMiddleware, async (req, res) => {  try {
   }
 });
 
-module.exports = router;
+// 🟢 FETCH PAYOUTS ROUTE 
+router.get('/:workerId', authMiddleware, async (req, res) => {
+  try {
+    // Find all claims for this specific worker and sort newest first
+    const claims = await Claim.find({ workerId: req.params.workerId }).sort({ timestamp: -1 });
+    
+    // Send the array of claims back to the React frontend
+    res.json(claims);
+  } catch (err) {
+    console.error("Error fetching claims:", err);
+    res.status(500).json({ error: "Failed to fetch payouts" });
+  }
+});
+
+export default router;

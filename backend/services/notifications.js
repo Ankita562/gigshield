@@ -1,7 +1,7 @@
-const twilio = require('twilio');
+import twilio from 'twilio';
 const client = twilio(process.env.TWILIO_SID, process.env.TWILIO_TOKEN);
 
-async function sendClaimNotification(worker, claim, fraudResult) {
+export async function sendClaimNotification(worker, claim, fraudResult) {
   const phone = `whatsapp:+91${worker.phone}`;
   const from  = 'whatsapp:+14155238886'; // Twilio sandbox number
 
@@ -17,5 +17,3 @@ async function sendClaimNotification(worker, claim, fraudResult) {
 
   await client.messages.create({ from, to: phone, body: message });
 }
-
-module.exports = { sendClaimNotification };

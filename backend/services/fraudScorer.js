@@ -13,7 +13,7 @@ const FRAUD_SERVICE_URL = process.env.FRAUD_SERVICE_URL || 'http://localhost:800
  * @param {Object} worker    - worker profile from your DB
  * @returns {Object} { fraud_score, verdict, flags }
  */
-async function scoreClaim(claim, telemetry, weather, worker) {
+export async function scoreClaim(claim, telemetry, weather, worker) {
   console.log("🔥🔥 FRAUD SCORER CALLED 🔥🔥");
   const ts = new Date();
   const payload = {
@@ -98,5 +98,3 @@ return data; // ✅ ALWAYS returns
 //   await db.approveClaim(claim);
 //   return res.status(200).json({ status: 'approved' });
 // });
-
-module.exports = { scoreClaim };

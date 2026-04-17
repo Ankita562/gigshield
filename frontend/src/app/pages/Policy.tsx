@@ -12,7 +12,7 @@ export function Policy() {
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem('gigshield_user') || 'null');
     const savedPolicy = localStorage.getItem('gigshield_policy');
-
+ 
     // 1. Priority: Load from local storage for consistency with Home screen
     if (savedPolicy) {
       setPolicy(JSON.parse(savedPolicy));
@@ -23,9 +23,20 @@ export function Policy() {
       return;
     }
 
-    // 2. Fetch fresh data from server
-    fetch(`${API_BASE}/api/policy/${user._id || user.id}`)
-      .then((res) => res.json())
+    // 1. Grab the token!
+    const token = localStorage.getItem('token');
+
+    // 2. Fetch with headers and the safety check
+    fetch(`${API_BASE}/api/policy/${user._id || user.id}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error(`Policy route not found (404)`);
+        return res.json();
+      })
       .then((data) => {
         const freshPolicy = data?.policy || (data && !data.message ? data : null);
         if (freshPolicy) {
@@ -59,6 +70,37 @@ export function Policy() {
       </MobileLayout>
     );
   }
+
+  // 1. Extract the raw numbers from the backend (with fallbacks for the demo)
+  // Make sure your backend actually sends 'basePremium' and 'weatherRisk'
+  const basePrice = policy?.basePremium || 30; 
+  const riskPrice = policy?.weatherRisk || 6; 
+
+  // 2. Do the exact GST math dynamically
+  const subtotal = basePrice + riskPrice;
+  // Using Math.round() to keep the UI clean with whole numbers (₹42 instead of ₹42.48)
+  const gstAmount = Math.round(subtotal * 0.18); 
+  const finalTotal = subtotal + gstAmount;
+
+  // 3. Build the object using the dynamic variables
+  const safeData = {
+    uin: policy?.uin || 'IRDAI-33752',
+    startDate: policy?.startDate || 'Feb 2026',
+    status: policy?.status || 'Active',
+    weeklyPremium: finalTotal, // Dynamically set to 42, 63, or 97 based on the plan!
+    riskMultiplier: policy?.riskMultiplier || 1,
+    
+    // Now the breakdown array builds itself based on the real math!
+    premiumBreakdown: [
+      { factor: 'Base Premium', impact: `₹${basePrice}` },
+      { factor: 'Weather Risk', impact: `+₹${riskPrice}` },
+      { factor: 'GST (18%)', impact: `+₹${gstAmount}` },
+    ],
+  };
+
+  const handleOpenPolicy = () => {
+    window.open(policyPdf, '_blank', 'noopener,noreferrer');
+  };
 
   return (
     <MobileLayout>
@@ -152,6 +194,16 @@ export function Policy() {
             Upgrade / Change Plan
           </button>
         </Link>
+      </div>
+
+      {/* CANCELLATION / FLEXIBILITY INFO */}
+      <div className="px-6 mb-6">
+        <div className="bg-[#8da9c4]/20 rounded-xl p-4 border border-[#8da9c4]/50 flex items-start gap-3">
+          <AlertCircle className="w-5 h-5 text-[#134074] mt-0.5 shrink-0" />
+          <p className="text-sm text-[#13315c]">
+            <span className="font-semibold">Zero Lock-in:</span> Pause or cancel your weekly renewals at any time with one click.
+          </p>
+        </div>
       </div>
     </MobileLayout>
   );

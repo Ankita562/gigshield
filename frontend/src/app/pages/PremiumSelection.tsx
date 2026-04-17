@@ -1,3 +1,4 @@
+/// <reference types="vite/client" />
 import { Check, Zap, ArrowRight, Loader2, Info, Shield, Sparkles, TrendingUp, AlertCircle, ChevronRight } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
@@ -11,12 +12,12 @@ declare global {
   }
 }
 
-type PlanTier = "Basic" | "Standard" | "Premium";
+type PlanTier = "basic" | "standard" | "premium";
 
 export function PremiumSelection() {
   const navigate = useNavigate();
   const { user: authUser, token: authToken } = useAuth();
-  const [activeTab, setActiveTab] = useState<PlanTier>("Standard");
+  const [activeTab, setActiveTab] = useState<PlanTier>("standard");
   const [agreed, setAgreed] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
@@ -32,9 +33,82 @@ export function PremiumSelection() {
 
   // Plan data
   const planData = {
-    Basic: { price: 30, payout: 400, rain: 40, aqi: 300, name: "Basic Shield", popular: false, color: "from-[#8da9c4] to-[#134074]" },
-    Standard: { price: 45, payout: 600, rain: 40, aqi: 300, name: "Standard Shield", popular: true, color: "from-[#134074] to-[#0b2545]" },
-    Premium: { price: 70, payout: 1000, rain: 35, aqi: 250, name: "Premium Shield", popular: false, color: "from-[#0b2545] via-[#13315c] to-[#134074]" },
+    basic: {
+      name: 'Basic Shield', // Capitalized for the UI
+      price: 30,
+      popular: false,
+      color: 'from-[#8da9c4] to-[#134074]',
+      // Added Actuarial Data below to fix the TypeScript errors!
+      rain: 40,
+      aqi: 300,
+      payout: 400,
+      features: [
+        { text: 'Rainfall protection (>40mm)', included: true },
+        { text: 'AQI protection (>300)', included: true },
+        { text: 'Up to ₹400 per event (Dynamic)', included: true },
+        { text: 'Up to 2 payouts per week', included: true },
+        { text: 'Heat wave protection', included: false },
+        { text: 'Storm protection', included: false },
+        { text: 'Priority claim processing', included: false },
+        { text: 'Premium lock guarantee', included: false },
+      ],
+      triggers: [
+        'Rainfall > 40mm in 24hrs → ₹400',
+        'AQI > 300 → ₹400',
+      ],
+    },
+    standard: {
+      name: 'Standard Shield',
+      price: 45,
+      popular: true,
+      color: 'from-[#134074] to-[#0b2545]',
+      // Added Actuarial Data!
+      rain: 40, 
+      aqi: 300,
+      payout: 600,
+      features: [
+        { text: 'Rainfall protection (>40mm)', included: true },
+        { text: 'AQI protection (>300)', included: true },
+        { text: 'Up to ₹600 per event (Dynamic)', included: true },
+        { text: 'Up to 2 payouts per week', included: true },
+        { text: 'Heat wave protection (≥40°C)', included: true },
+        { text: 'Storm protection (>55km/h)', included: true },
+        { text: 'Priority claim processing', included: false },
+        { text: 'Premium lock guarantee', included: false },
+      ],
+      triggers: [
+        'Rainfall > 40mm in 24hrs → ₹600',
+        'AQI > 300 → ₹600',
+        'Temperature ≥ 40°C → ₹600',
+        'Wind > 55km/h → ₹600',
+      ],
+    },
+    premium: {
+      name: 'Premium Shield',
+      price: 70,
+      popular: false,
+      color: 'from-[#0b2545] via-[#13315c] to-[#134074]',
+      // Added Actuarial Data!
+      rain: 35,
+      aqi: 250,
+      payout: 1000,
+      features: [
+        { text: 'Rainfall protection (>35mm)', included: true },
+        { text: 'AQI protection (>250)', included: true },
+        { text: 'Up to ₹1000 per event (Dynamic)', included: true },
+        { text: 'Up to 3 payouts per week', included: true },
+        { text: 'Heat wave protection (≥38°C)', included: true },
+        { text: 'Storm protection (>45km/h)', included: true },
+        { text: 'Priority claim processing (<3 mins)', included: true },
+        { text: 'Premium lock guarantee (6 weeks)', included: true },
+      ],
+      triggers: [
+        'Rainfall > 35mm in 24hrs → ₹1000',
+        'AQI > 250 → ₹1000',
+        'Temperature ≥ 38°C → ₹1000',
+        'Wind > 45km/h → ₹1000',
+      ],
+    },
   };
 
   const current = planData[activeTab];
@@ -44,35 +118,35 @@ export function PremiumSelection() {
   // Features mapping
   const getFeatures = (plan: PlanTier) => {
     const features = {
-      Basic: [
+      basic: [
         { text: "Rainfall protection (>40mm)", included: true },
         { text: "AQI protection (>300)", included: true },
-        { text: `Max payout: ₹${planData.Basic.payout} per event`, included: true },
+        { text: `Max payout: ₹${planData.basic.payout} per event`, included: true },
         { text: "Unlimited weekly events", included: true },
         { text: "Heat wave protection", included: false },
         { text: "Storm protection", included: false },
         { text: "Priority claim processing", included: false },
-        { text: "Premium lock guarantee", included: false },
+        { text: "premium lock guarantee", included: false },
       ],
-      Standard: [
+      standard: [
         { text: "Rainfall protection (>40mm)", included: true },
         { text: "AQI protection (>300)", included: true },
-        { text: `Max payout: ₹${planData.Standard.payout} per event`, included: true },
+        { text: `Max payout: ₹${planData.standard.payout} per event`, included: true },
         { text: "Unlimited weekly events", included: true },
         { text: "Heat wave protection (≥40°C)", included: true },
         { text: "Storm protection (>55km/h)", included: true },
         { text: "Priority claim processing", included: false },
-        { text: "Premium lock guarantee", included: false },
+        { text: "premium lock guarantee", included: false },
       ],
-      Premium: [
+      premium: [
         { text: "Rainfall protection (>35mm)", included: true },
         { text: "AQI protection (>250)", included: true },
-        { text: `Max payout: ₹${planData.Premium.payout} per event`, included: true },
+        { text: `Max payout: ₹${planData.premium.payout} per event`, included: true },
         { text: "Unlimited weekly events", included: true },
         { text: "Heat wave protection (≥38°C)", included: true },
         { text: "Storm protection (>45km/h)", included: true },
         { text: "Priority claim processing (<3 mins)", included: true },
-        { text: "Premium lock guarantee (6 weeks)", included: true },
+        { text: "premium lock guarantee (6 weeks)", included: true },
       ],
     };
     return features[plan];
@@ -80,19 +154,19 @@ export function PremiumSelection() {
 
   const getTriggers = (plan: PlanTier) => {
     const triggers = {
-      Basic: [
-        `Rainfall > ${planData.Basic.rain}mm in 24hrs → ₹${planData.Basic.payout}`,
-        `AQI > ${planData.Basic.aqi} → ₹${planData.Basic.payout}`,
+      basic: [
+        `Rainfall > ${planData.basic.rain}mm in 24hrs → ₹${planData.basic.payout}`,
+        `AQI > ${planData.basic.aqi} → ₹${planData.basic.payout}`,
       ],
-      Standard: [
-        `Rainfall > ${planData.Standard.rain}mm in 24hrs → ₹${planData.Standard.payout}`,
-        `AQI > ${planData.Standard.aqi} → ₹${planData.Standard.payout}`,
+      standard: [
+        `Rainfall > ${planData.standard.rain}mm in 24hrs → ₹${planData.standard.payout}`,
+        `AQI > ${planData.standard.aqi} → ₹${planData.standard.payout}`,
         "Temperature ≥ 40°C → ₹600",
         "Wind > 55km/h → ₹600",
       ],
-      Premium: [
-        `Rainfall > ${planData.Premium.rain}mm in 24hrs → ₹${planData.Premium.payout}`,
-        `AQI > ${planData.Premium.aqi} → ₹${planData.Premium.payout}`,
+      premium: [
+        `Rainfall > ${planData.premium.rain}mm in 24hrs → ₹${planData.premium.payout}`,
+        `AQI > ${planData.premium.aqi} → ₹${planData.premium.payout}`,
         "Temperature ≥ 38°C → ₹1000",
         "Wind > 45km/h → ₹1000",
       ],
@@ -243,7 +317,7 @@ export function PremiumSelection() {
               Your {current.name} is now active. You're protected 24/7.
             </p>
             <div className="bg-[#eef4ed] rounded-xl p-4 border border-[#8da9c4]/40">
-              <p className="text-sm text-[#13315c]/70 mb-1">Weekly Premium</p>
+              <p className="text-sm text-[#13315c]/70 mb-1">Weekly premium</p>
               <p className="text-3xl font-bold text-[#134074]">₹{current.price}</p>
             </div>
             <button
@@ -277,7 +351,7 @@ export function PremiumSelection() {
       </div>
 
       <div className="px-6 -mt-12 mb-6 space-y-4 relative z-20">
-        {(["Basic", "Standard", "Premium"] as const).map((planKey) => {
+        {(["basic", "standard", "premium"] as const).map((planKey) => {
           const plan = planData[planKey];
           const features = getFeatures(planKey);
           const triggers = getTriggers(planKey);
@@ -314,7 +388,7 @@ export function PremiumSelection() {
                 </div>
                 <div className="flex items-baseline gap-2">
                   <span className="text-5xl font-bold">₹{plan.price}</span>
-                  <span className="text-white/80 text-sm">/week</span>
+                  <span className="text-white/80 text-sm">/week + 18% GST added at checkout</span>
                 </div>
               </div>
 
@@ -374,11 +448,11 @@ export function PremiumSelection() {
                 </div>
                 <div className="flex items-center gap-2 text-sm">
                   <div className="w-1.5 h-1.5 bg-[#134074] rounded-full"></div>
-                  <span className="text-[#13315c]"><span className="font-bold">Unlimited events</span> - No cap on monthly claims</span>
+                  <span className="text-[#13315c]"><span className="font-bold">Reliable Coverage</span> - Protection for multiple severe weather events per month</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm">
                   <div className="w-1.5 h-1.5 bg-[#134074] rounded-full"></div>
-                  <span className="text-[#13315c]"><span className="font-bold">Cancel anytime</span> - 30-day money-back guarantee</span>
+                  <span className="text-[#13315c]"><span className="font-bold">Cancel anytime</span> - Zero lock-in periods, pause your coverage whenever you want</span>
                 </div>
               </div>
             </div>
@@ -436,9 +510,8 @@ export function PremiumSelection() {
             </>
           )}
         </button>
-
-        <p className="text-center text-xs text-[#13315c]/60">
-          ₹{current.price}/week • Cancel anytime • No hidden fees
+        <p className="text-center text-xs text-[#13315c]/60 mt-3">
+          ₹{planData[activeTab].price}/week • Cancel anytime • Zero lock-in
         </p>
       </div>
 
@@ -447,7 +520,8 @@ export function PremiumSelection() {
           <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" strokeWidth={2.5} />
           <div>
             <p className="text-sm text-amber-900 leading-relaxed">
-              <span className="font-semibold">Free Look Period:</span> Try risk-free for 30 days. Full refund if you're not satisfied. No questions asked.
+              <span className="font-semibold">Flexible Coverage:</span> Pause or stop your weekly renewals whenever you want with one click.
+(Note: A standard 24-hour waiting period applies to new policies to prevent active-storm fraud).
             </p>
           </div>
         </div>

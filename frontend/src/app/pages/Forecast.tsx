@@ -2,18 +2,34 @@ import { MobileLayout } from '../components/MobileLayout';
 import { CloudRain, Wind, Thermometer, AlertCircle, CheckCircle } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { API_BASE } from '../../config';
-
+ 
 export function Forecast() {
   const [forecast, setForecast] = useState<any[]>([]);
   const user = JSON.parse(localStorage.getItem("gigshield_user") || "null");
 
   useEffect(() => {
-    if (!user?._id) return;
-    fetch(`${API_BASE}/api/forecast/${user._id}`)
-      .then(res => res.json())
+    // 1. Safety check
+    if (!user?._id && !user?.id) return;
+
+    const userId = user._id || user.id;
+    // 2. Grab the token from the browser's pocket
+    const token = localStorage.getItem("token");
+
+    // 3. Fetch with headers and the HTML crash preventer
+    fetch(`${API_BASE}/api/forecast/${userId}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    })
+      .then(res => {
+        if (!res.ok) throw new Error("Forecast route not found (404)");
+        return res.json();
+      })
       .then(data => setForecast(data))
-      .catch(err => console.log(err));
-  }, [user?._id]);
+      .catch(err => console.error("Fetch forecast error:", err));
+      
+  }, [user]); 
 
   return (
     <MobileLayout>

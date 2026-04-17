@@ -28,9 +28,20 @@ export function Claims() {
     }
 
     const userId = user._id || user.id;
+    // 🟢 Grab the token from pocket
+    const token = localStorage.getItem("token");
 
-    fetch(`${API_BASE}/api/claims/${userId}`)
-      .then((res) => res.json())
+    // 🟢 Send the token in the Headers
+    fetch(`${API_BASE}/api/claims/${userId}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Network response was not ok");
+        return res.json();
+      })
       .then((data) => {
         if (Array.isArray(data)) {
           setClaims(data);
@@ -91,7 +102,7 @@ export function Claims() {
               >
                 <div className="flex justify-between items-center mb-2">
                   <p className="text-xl font-bold text-[#0b2545]">
-                    {claim.status === "approved" ? `₹${claim.amount || 0}` : "₹0"}
+                    {claim.status === "approved" ? `₹${claim.amountInr || 0}` : "₹0"}
                   </p>
                   <div className="flex items-center gap-1">
                     {claim.status === "approved" ? (
@@ -104,6 +115,21 @@ export function Claims() {
                     )}
                   </div>
                 </div>
+                <p className="text-sm text-[#13315c]">
+                  Reason: <span className="font-semibold text-[#0b2545]">{claim.claimType || claim.reason || "Automatic weather trigger"}</span>
+                </p>
+                <p className="text-xs text-[#13315c]/60 mt-1">
+                  {/* 🟢 Change createdAt to timestamp */}
+                  {(claim.timestamp || claim.createdAt)
+                    ? new Date(claim.timestamp || claim.createdAt).toLocaleString('en-IN', {
+                        day: '2-digit',
+                        month: 'short',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                      })
+                    : "Date unavailable"}
+                </p>
                 <p className="text-sm text-[#13315c]">
                   Reason: <span className="font-semibold text-[#0b2545]">{claim.reason || "Automatic weather trigger"}</span>
                 </p>

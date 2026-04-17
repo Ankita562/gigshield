@@ -1,6 +1,6 @@
-const express = require('express');
-const { authMiddleware } = require('../middleware/auth');
-const User = require('../models/User');
+import express from 'express';
+import { authMiddleware } from '../middleware/auth.js';
+import User from '../models/User.js';
 
 const router = express.Router();
 
@@ -38,4 +38,4 @@ router.post('/verify-kyc', authMiddleware, async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

@@ -16,10 +16,10 @@ import { API_BASE } from '../../config';
 
 type Claim = {
   _id: string;
-  amount: number;
-  reason: string;
+  amountInr: number;
+  claimType: string;
   status: string;
-  createdAt: string;
+  timestamp: string;
 };
 
 export function Payouts() {
@@ -36,24 +36,33 @@ export function Payouts() {
 
     const userId = user._id || user.id;
 
-    const fetchData = () => {
-      fetch(`${API_BASE}/api/claims/${userId}`)
-        .then((res) => res.json())
-        .then((data) => {
-          if (Array.isArray(data)) {
-            setPayouts(data);
-          } else if (Array.isArray(data?.claims)) {
-            setPayouts(data.claims);
-          } else {
-            setPayouts([]);
-          }
-        })
-        .catch((err) => {
-          console.error(err);
+  const fetchData = () => {
+    // 1. Grab the token from Local Storage
+    const token = localStorage.getItem('token');
+
+    // 2. Add the token to the Headers of the fetch request
+    fetch(`${API_BASE}/api/claims/${userId}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`, // <--- The magic key!
+        'Content-Type': 'application/json'
+      }
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        if (Array.isArray(data)) {
+          setPayouts(data);
+        } else if (Array.isArray(data?.claims)) {
+          setPayouts(data.claims);
+        } else {
           setPayouts([]);
-        })
-        .finally(() => setLoading(false));
-    };
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        setPayouts([]);
+      })
+      .finally(() => setLoading(false));
+  };
 
     fetchData();
     const interval = setInterval(fetchData, 5000);
@@ -63,50 +72,50 @@ export function Payouts() {
   // Transform payouts with calculated fields (same as first version)
   const payoutsWithCalculations = payouts.map((p) => ({
     id: p._id,
-    date: p.createdAt ? new Date(p.createdAt).toDateString() : "No date",
-    time: p.createdAt ? new Date(p.createdAt).toLocaleTimeString() : "-",
-    trigger: p.reason || "Unknown",
+    date: p.timestamp ? new Date(p.timestamp).toDateString() : "No date",
+    time: p.timestamp ? new Date(p.timestamp).toLocaleTimeString() : "-",
+    trigger: p.claimType || "Unknown",
     triggerType:
-      p.reason === "Heavy Rain"
+      p.claimType === "Heavy Rain"
         ? "rain"
-        : p.reason === "Heatwave"
+        : p.claimType === "Heatwave"
         ? "heat"
         : "pollution",
     value:
-      p.reason === "Heavy Rain"
+      p.claimType === "Heavy Rain"
         ? "40mm+"
-        : p.reason === "Heatwave"
+        : p.claimType === "Heatwave"
         ? "40°C+"
         : "AQI 300+",
     severity: "High",
     status: p.status === "approved" ? "paid" : "rejected",
     upiRef: "AUTO",
     processingTime: "5 mins",
-    baseAmount: p.amount || 0,
+    baseamountInr: p.amountInr || 0,
     severityMultiplier: 1,
     rarityFactor: 1,
     riskFactor: 1,
-    cap: { min: p.amount || 0, max: p.amount || 0 },
-    amount: p.amount || 0,
+    cap: { min: p.amountInr || 0, max: p.amountInr || 0 },
+    amountInr: p.amountInr || 0,
   }));
 
   // Filter based on active filter
   const filteredPayouts = payoutsWithCalculations.filter((p) => {
     if (activeFilter === 'all') return true;
-    if (activeFilter === 'paid') return p.status === "paid" && p.amount > 0;
+    if (activeFilter === 'paid') return p.status === "paid" && p.amountInr > 0;
     if (activeFilter === 'pending') return p.status === "pending";
     return false;
   });
 
   const totalPaid = payoutsWithCalculations
     .filter((p) => p.status === 'paid')
-    .reduce((sum, p) => sum + p.amount, 0);
+    .reduce((sum, p) => sum + p.amountInr, 0);
 
   const thisMonth = new Date().toLocaleString("en-US", { month: "short" });
   const thisMonthPayouts = payoutsWithCalculations.filter(
     (p) => p.date.includes(thisMonth) && p.status === 'paid'
   );
-  const thisMonthTotal = thisMonthPayouts.reduce((sum, p) => sum + p.amount, 0);
+  const thisMonthTotal = thisMonthPayouts.reduce((sum, p) => sum + p.amountInr, 0);
 
   const getEventIcon = (type: string) => {
     switch (type) {
@@ -250,7 +259,7 @@ export function Payouts() {
                   </div>
                   <div className="text-right ml-3">
                     <p className={`text-2xl font-bold ${payout.status === 'paid' ? "text-emerald-600" : "text-red-500"}`}>
-                      {payout.status === "paid" ? `+₹${payout.amount}` : "₹0"}
+                      {payout.status === "paid" ? `+₹${payout.amountInr}` : "₹0"}
                     </p>
                     <div className="flex items-center gap-1 justify-end mt-1">
                       {payout.status === 'paid' ? (
@@ -297,7 +306,7 @@ export function Payouts() {
                     <Info className="w-3.5 h-3.5 text-[#13315c]/60" strokeWidth={2} />
                   </div>
                   <div className="text-xs text-[#13315c]/80 font-mono leading-relaxed">
-                    <span className="text-[#0b2545] font-semibold">Base ₹{payout.baseAmount}</span>
+                    <span className="text-[#0b2545] font-semibold">Base ₹{payout.baseamountInr}</span>
                     <span className="text-[#13315c]/60"> × </span>
                     <span className="text-[#0b2545] font-semibold">Severity {payout.severityMultiplier}×</span>
                     <span className="text-[#13315c]/60"> × </span>

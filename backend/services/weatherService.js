@@ -1,14 +1,14 @@
 import axios from 'axios';
 import cron from 'node-cron';
 import 'dotenv/config';
+import Policy from "../models/Policy.js";
 import User from "../models/User.js";
-// This tells the backend how to talk to itself!
 const API_BASE = process.env.RENDER_EXTERNAL_URL || `http://127.0.0.1:${process.env.PORT || 5000}`;
 
 const ZOMATO_KEY = process.env.ZOMATO_KEY; 
 const IMD_API_KEY = process.env.IMD_API_KEY;
 
-export async function runConsensusEngine() {
+export async function runConsensusEngine(mode = 'live') {
     try {
         const timeNow = new Date().toLocaleTimeString();
         console.log(`\n[${timeNow}] 🛡️ GigKavach TRIPLE-NODE Consensus Engine Polling Koramangala...`);
@@ -60,48 +60,88 @@ export async function runConsensusEngine() {
             meteoRainMm = 0;
         }
 
+        // --- NODE 4: AQICN (Severe Pollution Tracker) ---
+        let actualAqi = 0;
+        try {
+            // Using the 'demo' token for hackathon speed
+            const aqiToken = process.env.AQICN_TOKEN || "demo"; 
+            const lat = 12.9337;
+            const lon = 77.6258;
+            const aqiUrl = `https://api.waqi.info/feed/geo:${lat};${lon}/?token=${aqiToken}`;
+            const aqiRes = await axios.get(aqiUrl);
+            actualAqi = aqiRes.data.data.aqi || 0;
+            console.log(`✅ NODE 4 (AQICN LIVE): AQI ${actualAqi}`);
+        } catch (e) {
+            console.log(`⚠️ NODE 4 (AQICN) Failed: ${e.message}`);
+            // DEMO OVERRIDE: Generates a normal AQI around 80. 
+            // Change this to 315 when recording your demo video to force a payout!
+            actualAqi = 80; 
+            console.log(`   -> 🛠️ OVERRIDE: Injecting live sim data: AQI ${actualAqi}`);
+        }
+
+        if (mode === 'rain') {
+            console.log("⛈️ SIMULATION OVERRIDE: Forcing massive storm data!");
+            zomatoRainMm = 45.2;
+            imdRainMm = 42.1;
+            meteoRainMm = 44.0;
+        } else if (mode === 'clear') {
+            console.log("☀️ SIMULATION OVERRIDE: Forcing clear skies!");
+            zomatoRainMm = 0;
+            imdRainMm = 0;
+            meteoRainMm = 0;
+        }
+        
         // --- ⚖️ THE ACTUARIAL DECISION LOGIC ---
         console.log(`\n⚖️ Analyzing Triple-Node Consensus...`);
         
-        // Count the votes from the 3 independent nodes
         let rainVotes = 0;
         if (zomatoRainMm > 25) rainVotes++;
         if (imdRainMm > 25) rainVotes++;
         if (meteoRainMm > 25) rainVotes++;
 
         console.log(`📊 Votes for Payout: ${rainVotes}/3`);
-
-        // Shared node data for frontend display
         const nodes = {
             zomato: zomatoRainMm,
             imd: imdRainMm,
             meteo: meteoRainMm
         };
+        const isToxicAir = actualAqi > 300; 
 
-        // Require 2 out of 3 nodes to agree to trigger a payout (Anti-Spoofing)
-        if (rainVotes >= 2) {
-            console.log(`🚨 MAJORITY CONSENSUS SUCCESS: 2+ networks confirm heavy rain. Triggering pool payouts!`);
+        if (rainVotes >= 2 || isToxicAir) {
+            console.log(isToxicAir ? `🚨 SEVERE POLLUTION DETECTED!` : `🚨 HEAVY RAIN DETECTED!`);
+
+            // 1. Only find users who actually HAVE an active policy
+            // We "populate" userId to get the full user object if needed
+            const activePolicies = await Policy.find({ status: 'active' }).populate('userId');
             
-            const users = await User.find();
-            for (const user of users) {
+            console.log(`📡 Found ${activePolicies.length} active policies in this zone. Executing...`);
+
+            for (const policy of activePolicies) {
+                if (!policy.userId) continue; // Skip if the user account was deleted
+
                 try {
+                    // 2. IMPORTANT: Use the field name your route expects (userId)
                     const res = await axios.post(`${API_BASE}/api/trigger-claim`, {
-                        userId: user._id,
-                        rainfall: Math.max(zomatoRainMm, imdRainMm, meteoRainMm), // Send the highest recorded value
-                        aqi: 0
+                        workerId: policy.userId._id, // Match the backend 'userId'
+                        amountInr: policy.payoutAmount || 200, // Dynamic amount based on plan
+                        
+                        claimType: isToxicAir ? 'poor_aqi' : 'rain_damage',
+                        actualRainfallMm: Math.max(zomatoRainMm, imdRainMm, meteoRainMm), 
+                        actualAqi: actualAqi 
                     });
-                    console.log(`✅ Claim successful for user ${user._id}`);
-                } catch(err) {
-                    console.log(`❌ Claim API error for user ${user._id}:`, err.response?.data || err.message);
-                }
+                    
+                    console.log(`✅ Payout Successful: ₹${policy.payoutAmount || 200} -> ${policy.userId.name || policy.userId._id}`);
+                }  catch(err) {
+                    const errorMsg = err.response?.data?.error || err.message;
+                    console.log(`❌ Payout Failed: ${errorMsg}`);
+                   }
             }
-            return { payout: true, votes: rainVotes, nodes };
+            return { payout: true, votes: rainVotes, aqiTrigger: isToxicAir, nodes };
 
         } else {
-            console.log(`🟢 SAFE: Split consensus or normal weather. No payout to protect pool health.`);
-            return { payout: false, votes: rainVotes, nodes };
+            console.log(`🟢 SAFE: No payout triggered.`);
+            return { payout: false, votes: rainVotes, aqiTrigger: false, nodes };
         }
-
     } catch (error) {
         console.error('❌ Critical Engine Failure:', error.message);
         return { payout: false, error: true, nodes: { zomato: 0, imd: 0, meteo: 0 } };
