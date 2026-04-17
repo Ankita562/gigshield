@@ -400,23 +400,36 @@ cd gigkavach
  
 ### Step 2 — Environment Variables
 Create `.env` inside `backend/`:
-```
+```env
+# Database & ML Engine
 MONGO_URI=your_mongodb_connection_string
+FRAUD_SERVICE_URL=[http://127.0.0.1:10000](http://127.0.0.1:10000)
+
+# Weather APIs (Triple-Node)
 ZOMATO_KEY=your_weather_union_key
 IMD_API_KEY=your_imd_key
+
+# Notifications
+TWILIO_ACCOUNT_SID=your_twilio_sid
+TWILIO_AUTH_TOKEN=your_twilio_auth_token
+TWILIO_PHONE_NUMBER=your_twilio_phone_number
+
+# System Modes
 DEMO_MODE=true
 
 ```
  
-### Step 3 — Train the ML Fraud Engine
-Our Random Forest model is trained on a dataset of 5,000+ historical claims. To install the dependencies and generate the `fraud_model.pkl` brain, run:
+### Step 3 — Train & Run the ML Fraud Engine (Port 10000)
+Our Sentinel model is trained on historical claim telemetry. Open a new terminal to install dependencies, train the model, and start the FastAPI server:
 
 ```bash
 cd ml
 pip install -r requirements.txt
 python train_model.py
+uvicorn fraud_service:app --host 0.0.0.0 --port 10000
 ```
- 
+✅ Expected: Uvicorn running on http://0.0.0.0:10000
+
 ### Step 4 — Run Node.js Backend (Port 5000)
 Open a new terminal:
 ```bash
@@ -437,11 +450,11 @@ npm run dev
  
 ### Architecture
 ```
-Frontend  (React Native)   :5173
+Frontend  (React Native /Web)   :5173
       ↓
-Backend   (Node.js)        :5000  ← trigger engine, claims, policies, fraud
+Backend   (Node.js)        :5000  ← trigger engine, claims, policies, wallets
       ↓
-AI Service (Python Flask)  :5001  ← risk scoring, premium calculation
+AI Service (Python FastAPI)     :10000 ← risk scoring, Sentinel anti-spoofing
       ↓
 MongoDB Atlas                     ← users, policies, claims, audit logs
 ```
