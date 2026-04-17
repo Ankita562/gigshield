@@ -14,21 +14,26 @@ export function MobileLayout({ children }: { children: React.ReactNode }) {
   ];
 
   return (
-    <div className="min-h-screen bg-[#e5e7eb] flex items-center justify-center p-4">
-      
-      {/* 📱 COMPACT CONTAINER (GigKavach Edition) */}
-      <div className="relative flex flex-col overflow-hidden bg-white w-[300px] h-[520px] rounded-[24px] shadow-2xl border-[6px] border-[#13315C]/5">
-        
-        {/* 📜 CONTENT AREA */}
+    // On mobile: full screen. On desktop (md+): centered mockup with grey bg
+    <div className="min-h-screen bg-white md:bg-[#e5e7eb] md:flex md:items-center md:justify-center md:p-4">
+
+      {/* On mobile: fills screen. On desktop: phone-frame mockup */}
+      <div className="
+        relative flex flex-col overflow-hidden bg-white
+        w-full min-h-screen
+        md:w-[390px] md:min-h-0 md:h-[780px] md:rounded-[40px] md:shadow-2xl md:border-[6px] md:border-[#13315C]/10
+      ">
+
+        {/* Content area — no zoom hack, natural sizing */}
         <main className="flex-1 overflow-y-auto bg-[#F8FAFC] scrollbar-hide pb-20">
-          <div style={{ zoom: '0.60', transformOrigin: 'top center' }}>
-            {children}
-          </div>
+          {children}
         </main>
 
-        {/* 🔻 PREMIUM BOTTOM NAV */}
-        <nav className="absolute bottom-0 w-full bg-white/90 backdrop-blur-md border-t border-slate-100 px-1 pt-2 pb-3 z-50">
-          <div className="grid grid-cols-6 items-center h-10">
+        {/* Bottom nav */}
+        <nav className="absolute bottom-0 w-full bg-white/95 backdrop-blur-md border-t border-slate-100 px-2 pt-2 pb-safe z-50"
+          style={{ paddingBottom: 'max(12px, env(safe-area-inset-bottom))' }}
+        >
+          <div className="grid grid-cols-6 items-center h-12">
             {navItems.map((item) => {
               const isActive = location.pathname === item.path;
               const Icon = item.icon;
@@ -40,17 +45,16 @@ export function MobileLayout({ children }: { children: React.ReactNode }) {
                   className="flex flex-col items-center justify-center transition-all active:scale-90"
                 >
                   <div
-                    className={`flex items-center justify-center w-8 h-8 rounded-xl transition-all duration-300 ${
+                    className={`flex items-center justify-center w-9 h-9 rounded-xl transition-all duration-300 ${
                       isActive
                         ? 'bg-[#13315C] text-white shadow-lg'
                         : 'text-slate-400'
                     }`}
                   >
-                    <Icon size={14} strokeWidth={isActive ? 3 : 2} />
+                    <Icon size={17} strokeWidth={isActive ? 2.5 : 2} />
                   </div>
-
                   <span
-                    className={`text-[7px] mt-1 font-black uppercase tracking-tighter ${
+                    className={`text-[9px] mt-0.5 font-bold uppercase tracking-tight ${
                       isActive ? 'text-[#13315C]' : 'text-slate-400'
                     }`}
                   >
