@@ -30,41 +30,43 @@ export function MobileLayout({ children }: { children: React.ReactNode }) {
         </main>
 
         {/* Bottom nav */}
-        <nav className="absolute bottom-0 w-full bg-white/95 backdrop-blur-md border-t border-slate-100 px-2 pt-2 pb-safe z-50"
-          style={{ paddingBottom: 'max(12px, env(safe-area-inset-bottom))' }}
-        >
-          <div className="grid grid-cols-6 items-center h-12">
-            {navItems.map((item) => {
-              const isActive = location.pathname === item.path;
-              const Icon = item.icon;
+        {/* Bottom nav */}
+<nav
+  className="fixed bottom-0 left-0 w-full bg-white/95 backdrop-blur-md border-t border-slate-100 px-2 pt-2 z-50 md:absolute md:left-auto"
+  style={{ paddingBottom: 'max(12px, env(safe-area-inset-bottom))' }}
+>
+  <div className="grid grid-cols-6 items-center h-12">
+    {navItems.map((item) => {
+      const isActive = location.pathname === item.path;
+      const Icon = item.icon;
 
-              return (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  className="flex flex-col items-center justify-center transition-all active:scale-90"
-                >
-                  <div
-                    className={`flex items-center justify-center w-9 h-9 rounded-xl transition-all duration-300 ${
-                      isActive
-                        ? 'bg-[#13315C] text-white shadow-lg'
-                        : 'text-slate-400'
-                    }`}
-                  >
-                    <Icon size={17} strokeWidth={isActive ? 2.5 : 2} />
-                  </div>
-                  <span
-                    className={`text-[9px] mt-0.5 font-bold uppercase tracking-tight ${
-                      isActive ? 'text-[#13315C]' : 'text-slate-400'
-                    }`}
-                  >
-                    {item.label}
-                  </span>
-                </Link>
-              );
-            })}
+      return (
+        <Link
+          key={item.path}
+          to={item.path}
+          className="flex flex-col items-center justify-center transition-all active:scale-90"
+        >
+          <div
+            className={`flex items-center justify-center w-9 h-9 rounded-xl transition-all duration-300 ${
+              isActive
+                ? 'bg-[#13315C] text-white shadow-lg'
+                : 'text-slate-400'
+            }`}
+          >
+            <Icon size={17} strokeWidth={isActive ? 2.5 : 2} />
           </div>
-        </nav>
+          <span
+            className={`text-[9px] mt-0.5 font-bold uppercase tracking-tight ${
+              isActive ? 'text-[#13315C]' : 'text-slate-400'
+            }`}
+          >
+            {item.label}
+          </span>
+        </Link>
+      );
+    })}
+  </div>
+</nav>
       </div>
     </div>
   );
