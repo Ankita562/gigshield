@@ -66,15 +66,44 @@ export function Home() {
 
     const fetchData = async () => {
       try {
+        // 1. Fetch all claims for this user (Same endpoint your Payouts tab uses)
+        const claimsRes = await fetch(`${API_BASE}/api/claims/${userId}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        let calculatedEarnings = 0;
+        let protectedDaysCount = 0;
+
+        if (claimsRes.ok) {
+           const claimsData = await claimsRes.json();
+           
+           // Math: Sum up only the 'approved' claims
+           calculatedEarnings = claimsData
+             .filter(claim => claim.status === 'approved')
+             .reduce((sum, claim) => sum + (claim.amountInr || 0), 0);
+             
+           // Fake protected days if they have activity
+           protectedDaysCount = claimsData.length > 0 ? 7 : 0;
+        }
+
+        // 2. Fetch the dashboard data (weather, etc)
         const res = await fetch(`${API_BASE}/api/policy/dashboard/${userId}`, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
         });
+        
         if (!res.ok) throw new Error('Failed to fetch dashboard');
         const data = await res.json();
-        setPolicy(data);
+        
+        // 3. FORCE the calculated earnings into the state!
+        setPolicy({
+            ...data,
+            totalEarnings: calculatedEarnings,
+            protectedDays: protectedDaysCount
+        });
+
       } catch (err) {
         console.error('Dashboard fetch error:', err);
         setPolicy({

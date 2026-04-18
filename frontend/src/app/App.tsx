@@ -1,3 +1,4 @@
+import { Analytics } from "@vercel/analytics/next"
 import { RouterProvider } from 'react-router-dom';
 import { router } from './routes';
 
